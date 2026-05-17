@@ -64,7 +64,7 @@ sqlite3 data/social.db "SELECT 'users', COUNT(*) FROM users UNION ALL SELECT 'po
 ## Smoke test restore automatico
 
 ```bash
-npx tsx scripts/test-backup-restore.mjs
+npx tsx scripts/test-backup-restore.ts
 ```
 
 Questo script:

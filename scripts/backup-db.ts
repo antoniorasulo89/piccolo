@@ -10,6 +10,24 @@ if (!url || !token) {
 
 const db = createClient({ url, authToken: token });
 
+const FTS_SHADOW_PREFIXES = ["post_fts_"];
+
+function isFtsRelated(name: string, type: string) {
+  if (FTS_SHADOW_PREFIXES.some((p) => name.startsWith(p))) return true;
+  if (type === "trigger" && (name.includes("_fts_") || name.includes("_fts"))) return true;
+  return false;
+}
+
+function sqlValue(val: unknown): string {
+  if (val === null) return "NULL";
+  if (typeof val === "number") {
+    if (Number.isInteger(val)) return String(val);
+    return String(val);
+  }
+  const str = String(val);
+  return `'${str.replace(/'/g, "''")}'`;
+}
+
 async function dump() {
   const output: string[] = [];
 
@@ -23,6 +41,7 @@ async function dump() {
 
   for (const row of schemas.rows) {
     const s = row as unknown as { type: string; name: string; sql: string };
+    if (isFtsRelated(s.name, s.type)) continue;
     output.push(`-- ${s.type}: ${s.name}`);
     output.push(`${s.sql};`);
     output.push("");
@@ -34,6 +53,8 @@ async function dump() {
 
   for (const row of tables.rows) {
     const name = String((row as unknown as { name: string }).name);
+    if (FTS_SHADOW_PREFIXES.some((p) => name.startsWith(p))) continue;
+
     const data = await db.execute(`SELECT * FROM "${name}"`);
     if (data.rows.length === 0) continue;
 
@@ -41,12 +62,7 @@ async function dump() {
     output.push(`-- Data: ${name} (${data.rows.length} rows)`);
 
     for (const dataRow of data.rows) {
-      const values = columns.map((col) => {
-        const val = (dataRow as Record<string, unknown>)[col];
-        if (val === null) return "NULL";
-        if (typeof val === "number") return String(val);
-        return `'${String(val).replace(/'/g, "''")}'`;
-      });
+      const values = columns.map((col) => sqlValue((dataRow as Record<string, unknown>)[col]));
       output.push(
         `INSERT INTO "${name}" (${columns.map((c) => `"${c}"`).join(", ")}) VALUES (${values.join(", ")});`
       );
