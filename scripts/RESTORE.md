@@ -61,6 +61,21 @@ curl https://my-social-hazel.vercel.app/api/health
 sqlite3 data/social.db "SELECT 'users', COUNT(*) FROM users UNION ALL SELECT 'posts', COUNT(*) FROM posts UNION ALL SELECT 'groups', COUNT(*) FROM groups;"
 ```
 
+## Smoke test restore automatico
+
+```bash
+npx tsx scripts/test-backup-restore.mjs
+```
+
+Questo script:
+1. Esegue un dump completo dal database sorgente (Turso)
+2. Crea un database SQLite temporaneo vergine
+3. Applica il dump sul DB vergine
+4. Confronta i conteggi di righe pre/post restore per `users`, `posts`, `groups`
+5. Pulisce i file temporanei
+
+Output atteso: `✓ Restore verificato: tutti i conteggi corrispondono.`
+
 ## Cosa contiene il backup
 
 - Schema completo: CREATE TABLE, CREATE INDEX, CREATE TRIGGER

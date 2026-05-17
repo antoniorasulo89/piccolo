@@ -42,14 +42,27 @@ export async function POST(request: Request) {
   );
   if (!group) return jsonError("Gruppo non trovato.", 404);
 
-  execute(
-    "INSERT INTO group_members (group_id, user_id, role, status) VALUES (?, ?, 'member', 'active')",
-    [groupId, user.id],
-  ).catch(() => {});
-  execute(
+  const updateResult = await execute(
     "UPDATE group_invites SET used_count = used_count + 1 WHERE id = ? AND (expires_at IS NULL OR expires_at > CURRENT_TIMESTAMP) AND (max_uses IS NULL OR used_count < max_uses)",
     [invite.id],
   );
+
+  if (updateResult.rowsAffected === 0) {
+    return jsonError("Link di invito scaduto o esaurito.", 400);
+  }
+
+  try {
+    await execute(
+      "INSERT INTO group_members (group_id, user_id, role, status) VALUES (?, ?, 'member', 'active')",
+      [groupId, user.id],
+    );
+  } catch {
+    await execute(
+      "UPDATE group_invites SET used_count = MAX(used_count - 1, 0) WHERE id = ?",
+      [invite.id],
+    );
+    return jsonError("Impossibile completare l'accesso. Riprova.", 500);
+  }
 
   return NextResponse.json({ joined: true, groupId });
 }
