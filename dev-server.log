@@ -1,0 +1,145 @@
+
+> my-social@0.1.0 dev
+> next dev --port 3000
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.7:3000
+- Environments: .env.local
+✓ Ready in 297ms
+
+ GET /login 200 in 342ms (next.js: 135ms, application-code: 207ms)
+ GET /login 200 in 46ms (next.js: 3ms, application-code: 43ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+        <LoadingBoundary name="login/" loading={null}>
+          <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+            <RedirectBoundary>
+              <RedirectErrorBoundary router={{...}}>
+                <InnerLayoutRouter url="/login" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+                  <SegmentViewNode type="page" pagePath="login/page...">
+                    <SegmentTrieNode>
+                    <LoginPage>
+                      <main className="mx-auto gr...">
+                        <section className="max-w-md">
+                          <p>
+                          <h1>
+                          <AuthForm mode="login">
+                            <form onSubmit={function submit} className="mt-8 grid ...">
+                              <div className="grid gap-2">
+                                <label>
+                                <input
+                                  id="email"
+                                  name="email"
+                                  type="email"
+                                  autoComplete="email"
+                                  required={true}
+                                  className="h-11 rounded-lg border border-charcoal/10 bg-paper px-3 text-charcoal out..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                              <div className="grid gap-2">
+                                <label>
+                                <input
+                                  id="password"
+                                  name="password"
+                                  type="password"
+                                  autoComplete="current-password"
+                                  minLength={8}
+                                  required={true}
+                                  className="h-11 rounded-lg border border-charcoal/10 bg-paper px-3 text-charcoal out..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                ...
+                              ...
+                        ...
+                  ...
+                ...
+      ...
+ 
+ GET /login 200 in 54ms (next.js: 3ms, application-code: 51ms)
+[browser] A tree hydrated but some attributes of the server rendered HTML didn't match the client properties. This won't be patched up. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <InnerScrollAndFocusHandlerOld focusAndScrollRef={{scrollRef:null, ...}} cacheNode={{rsc:{...}, ...}}>
+      <ErrorBoundary errorComponent={undefined} errorStyles={undefined} errorScripts={undefined}>
+        <LoadingBoundary name="login/" loading={null}>
+          <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+            <RedirectBoundary>
+              <RedirectErrorBoundary router={{...}}>
+                <InnerLayoutRouter url="/login" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+                  <SegmentViewNode type="page" pagePath="login/page...">
+                    <SegmentTrieNode>
+                    <LoginPage>
+                      <main className="mx-auto gr...">
+                        <section className="max-w-md">
+                          <p>
+                          <h1>
+                          <AuthForm mode="login">
+                            <form onSubmit={function submit} className="mt-8 grid ...">
+                              <div className="grid gap-2">
+                                <label>
+                                <input
+                                  id="email"
+                                  name="email"
+                                  type="email"
+                                  autoComplete="email"
+                                  required={true}
+                                  className="h-11 rounded-lg border border-charcoal/10 bg-paper px-3 text-charcoal out..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                              <div className="grid gap-2">
+                                <label>
+                                <input
+                                  id="password"
+                                  name="password"
+                                  type="password"
+                                  autoComplete="current-password"
+                                  minLength={8}
+                                  required={true}
+                                  className="h-11 rounded-lg border border-charcoal/10 bg-paper px-3 text-charcoal out..."
+-                                 style={{caret-color:"transparent"}}
+                                >
+                                ...
+                              ...
+                        ...
+                  ...
+                ...
+      ...
+ 
+✓ Compiled in 126ms
+✓ Compiled in 129ms
+✓ Compiled in 348ms
+✓ Compiled in 241ms
+✓ Compiled in 67ms
+✓ Compiled in 63ms
+✓ Compiled in 87ms
+⚠ Found a change in next.config.ts. Restarting the server to apply the changes...
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3000
+- Network:       http://192.168.1.7:3000
+- Environments: .env.local
+✓ Ready in 284ms
+

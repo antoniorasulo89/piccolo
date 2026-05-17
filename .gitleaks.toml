@@ -1,0 +1,15 @@
+title = "Piccolo gitleaks config"
+
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Local examples and generated reports"
+paths = [
+  '''\.env(\..*)?''',
+  '''playwright-report/.*''',
+  '''test-results/.*''',
+  '''\.next/.*''',
+  '''gitleaks-report\.json''',
+  '''node_modules/.*''',
+]

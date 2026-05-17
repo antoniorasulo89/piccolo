@@ -1,0 +1,40 @@
+{
+  "name": "my-social",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "db:init": "tsx scripts/init-db.ts",
+    "start": "next start",
+    "prepare": "node scripts/install-githooks.mjs",
+    "lint": "eslint",
+    "audit:admin": "node scripts/audit-admin-routes.mjs",
+    "test:e2e": "playwright test",
+    "secrets:scan": "gitleaks detect --no-git --redact --source ."
+  },
+  "dependencies": {
+    "@libsql/client": "^0.17.3",
+    "@phosphor-icons/react": "^2.1.10",
+    "bcryptjs": "^3.0.3",
+    "better-sqlite3": "^12.10.0",
+    "jose": "^6.2.3",
+    "next": "16.2.6",
+    "react": "19.2.4",
+    "react-dom": "19.2.4",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@playwright/test": "^1.60.0",
+    "@tailwindcss/postcss": "^4",
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^20",
+    "@types/react": "^19",
+    "@types/react-dom": "^19",
+    "eslint": "^9",
+    "eslint-config-next": "16.2.6",
+    "tailwindcss": "^4",
+    "tsx": "^4.22.0",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,22 @@
+
+> my-social@0.1.0 dev
+> next dev --port 3002
+
+▲ Next.js 16.2.6 (Turbopack)
+- Local:         http://localhost:3002
+- Network:       http://192.168.1.7:3002
+- Environments: .env.local
+✓ Ready in 312ms
+
+ GET /login 200 in 390ms (next.js: 200ms, application-code: 190ms)
+ POST /api/auth/register 201 in 239ms (next.js: 37ms, application-code: 202ms)
+ POST /api/auth/login 200 in 217ms (next.js: 20ms, application-code: 198ms)
+ GET /feed 200 in 70ms (next.js: 16ms, application-code: 54ms)
+ GET /onboarding 200 in 289ms (next.js: 225ms, application-code: 65ms)
+ GET /admin 200 in 49ms (next.js: 17ms, application-code: 32ms)
+ GET /feed 200 in 30ms (next.js: 1890µs, application-code: 28ms)
+ GET /onboarding 200 in 34ms (next.js: 1448µs, application-code: 32ms)
+  Reload env: .env.local
+  Reload env: .env.local
+  Reload env: .env.local
+[?25h

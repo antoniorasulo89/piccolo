@@ -1,0 +1,5 @@
+.next
+artifacts
+data
+node_modules
+*.log

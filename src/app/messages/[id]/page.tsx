@@ -1,0 +1,112 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { MessageComposer } from "@/components/MessageComposer";
+import { RefreshCountsOnMount } from "@/components/RefreshCountsOnMount";
+import { UserAvatar } from "@/components/UserAvatar";
+import { getCurrentUser } from "@/lib/auth";
+import { getConversationDetail } from "@/lib/messages";
+
+type MessagePageProps = {
+  params: Promise<{ id: string }>;
+};
+
+function formatDate(value: string) {
+  return new Intl.DateTimeFormat("it-IT", {
+    day: "2-digit",
+    month: "short",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(new Date(value));
+}
+
+export default async function MessagePage({ params }: MessagePageProps) {
+  const user = await getCurrentUser();
+  if (!user) redirect("/login");
+
+  const { id } = await params;
+  const conversationId = Number(id);
+  if (!Number.isInteger(conversationId)) notFound();
+
+  const detail = await getConversationDetail(conversationId, user.id);
+  if (!detail) notFound();
+
+  const title =
+    detail.conversation.title ||
+    detail.members
+      .filter((member) => member.id !== user.id)
+      .map((member) => member.name)
+      .join(", ") ||
+    "Conversazione";
+
+  return (
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
+      <RefreshCountsOnMount />
+      <section className="rounded-lg border border-charcoal/10 bg-linear-to-br from-surface via-surface to-clay-100/28 p-5 shadow-[0_24px_80px_-58px_oklch(22%_0.018_160)]">
+        <Link href="/messages" className="text-sm font-semibold text-fern-900 underline-offset-4 hover:underline">
+          Torna ai messaggi
+        </Link>
+        <div className="mt-4 flex flex-col gap-4 border-b border-charcoal/10 pb-5 sm:flex-row sm:items-end sm:justify-between">
+          <div>
+            <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-fern-900">
+              {detail.conversation.type === "group_dm" ? "DM gruppo" : "DM"}
+            </p>
+            <h1 className="mt-2 text-3xl font-semibold tracking-tight text-charcoal">
+              {title}
+            </h1>
+            <p className="mt-2 text-sm text-charcoal/55">
+              {detail.members.length} partecipanti
+            </p>
+          </div>
+          <div className="flex -space-x-2">
+            {detail.members.slice(0, 5).map((member) => (
+              <UserAvatar key={member.id} user={member} size="sm" />
+            ))}
+          </div>
+        </div>
+
+        <div className="mt-5 grid gap-3">
+          {detail.messages.length ? (
+            detail.messages.map((message) => {
+              const mine = message.sender.id === user.id;
+              return (
+                <article
+                  key={message.id}
+                  className={`flex gap-3 ${mine ? "justify-end" : "justify-start"}`}
+                >
+                  {!mine ? (
+                    <Link href={`/profile/${message.sender.id}`} className="mt-1 shrink-0">
+                      <UserAvatar user={message.sender} size="sm" />
+                    </Link>
+                  ) : null}
+                  <div
+                    className={`max-w-[min(38rem,85%)] rounded-lg px-4 py-3 ${
+                      mine
+                        ? "bg-charcoal text-paper shadow-[inset_0_3px_0_var(--clay)]"
+                        : "border border-charcoal/10 bg-paper text-charcoal"
+                    }`}
+                  >
+                    <p className={`text-xs font-semibold ${mine ? "text-paper/72" : "text-charcoal/45"}`}>
+                      {message.sender.name} / {formatDate(message.created_at)}
+                    </p>
+                    <p className="mt-1 whitespace-pre-wrap leading-7">{message.content}</p>
+                  </div>
+                </article>
+              );
+            })
+          ) : (
+            <div className="rounded-lg border border-dashed border-charcoal/16 bg-paper/64 p-8">
+              <h2 className="text-xl font-semibold tracking-tight text-charcoal">
+                Nessun messaggio ancora.
+              </h2>
+              <p className="mt-2 text-charcoal/58">Scrivi il primo messaggio qui sotto.</p>
+            </div>
+          )}
+        </div>
+
+        <div className="mt-6 border-t border-charcoal/10 pt-4">
+          <MessageComposer conversationId={conversationId} />
+        </div>
+      </section>
+    </main>
+  );
+}

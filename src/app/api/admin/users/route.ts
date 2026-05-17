@@ -1,0 +1,7 @@
+import { NextResponse } from "next/server";
+import { getAdminUsers } from "@/lib/admin";
+import { withAdmin } from "@/lib/admin-guard";
+
+export async function GET() {
+  return withAdmin(async () => NextResponse.json(await getAdminUsers()));
+}
