@@ -23,7 +23,7 @@ test("register -> post -> like", async ({ page }) => {
   await expect(page).toHaveURL(/\/explore/);
 
   await page.goto("/feed");
-  await page.getByLabel("Nuovo post").fill(content);
+  await page.getByLabel("Nuovo pensiero").fill(content);
   await page.getByRole("button", { name: "Pubblica" }).click();
 
   const post = page.locator("article").filter({ hasText: content }).first();

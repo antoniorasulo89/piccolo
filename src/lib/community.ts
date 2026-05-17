@@ -22,6 +22,7 @@ type GroupPostRow = {
   content: string;
   created_at: string;
   edited_at: string | null;
+  pinned_at: string | null;
   user_id: number;
   name: string;
   role: "admin" | "user";
@@ -53,12 +54,13 @@ function mapGroup(row: GroupRow): CommunityGroup {
   };
 }
 
-function mapGroupPost(row: GroupPostRow): PostWithAuthor {
+function mapGroupPost(row: GroupPostRow): PostWithAuthor & { pinned_at: string | null } {
   return {
     id: row.id,
     content: row.content,
     created_at: row.created_at,
     edited_at: row.edited_at,
+    pinned_at: row.pinned_at,
     likes_count: row.likes_count,
     comments_count: row.comments_count,
     i_liked: Boolean(row.i_liked),
@@ -153,7 +155,7 @@ export async function getGroupBySlug(slug: string, viewerId: number, page = 0) {
   const offset = Math.max(page, 0) * PAGE_SIZE;
   const posts = await queryAll<GroupPostRow>(
     `
-      SELECT p.id, p.content, p.created_at, p.edited_at, p.user_id, u.name, u.role, u.avatar_url,
+      SELECT p.id, p.content, p.created_at, p.edited_at, p.pinned_at, p.user_id, u.name, u.role, u.avatar_url,
         COUNT(l.post_id) AS likes_count,
         (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) AS comments_count,
         EXISTS(SELECT 1 FROM likes mine WHERE mine.user_id = ? AND mine.post_id = p.id) AS i_liked,
@@ -163,7 +165,7 @@ export async function getGroupBySlug(slug: string, viewerId: number, page = 0) {
       LEFT JOIN likes l ON l.post_id = p.id
       WHERE p.group_id = ?
       GROUP BY p.id
-      ORDER BY p.created_at DESC
+      ORDER BY p.pinned_at IS NULL, p.pinned_at DESC, p.created_at DESC
       LIMIT ? OFFSET ?
     `,
     [viewerId, viewerId, mapped.id, PAGE_LIMIT, offset],

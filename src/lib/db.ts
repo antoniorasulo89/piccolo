@@ -4,7 +4,7 @@ import path from "node:path";
 
 const dataDir = path.join(process.cwd(), "data");
 const localDbPath = path.join(dataDir, process.env.TEST_DB_PATH ?? "social.db");
-const SCHEMA_VERSION = 2;
+const SCHEMA_VERSION = 3;
 
 type GlobalWithDb = typeof globalThis & {
   __socialDb?: Client;
@@ -224,6 +224,20 @@ export async function migrate() {
       )
     `,
       `
+      CREATE TABLE IF NOT EXISTS group_invites (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        token_hash TEXT NOT NULL UNIQUE,
+        created_by INTEGER NOT NULL,
+        max_uses INTEGER DEFAULT NULL,
+        used_count INTEGER NOT NULL DEFAULT 0,
+        expires_at TEXT DEFAULT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (created_by) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `,
+      `
       CREATE TABLE IF NOT EXISTS conversations (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         type TEXT NOT NULL DEFAULT 'direct',
@@ -426,6 +440,21 @@ export async function migrate() {
 
   if (!hasReportResolutionNote) {
     await db.execute("ALTER TABLE reports ADD COLUMN resolution_note TEXT NOT NULL DEFAULT ''");
+  }
+
+  const hasPostPinnedAt = postColumns.rows.some((column) => column.name === "pinned_at");
+  if (!hasPostPinnedAt) {
+    await db.execute("ALTER TABLE posts ADD COLUMN pinned_at TEXT DEFAULT NULL");
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_posts_pinned ON posts(pinned_at)");
+  }
+
+  const hasGroupInvitesCreatedBy = await db.execute("PRAGMA table_info(group_invites)");
+  if (hasGroupInvitesCreatedBy.rows.length > 0) {
+    const inviteColumns = await db.execute("PRAGMA table_info(group_invites)");
+    const hasInviteCreatedBy = inviteColumns.rows.some((column) => column.name === "created_by");
+    if (!hasInviteCreatedBy) {
+      await db.execute("ALTER TABLE group_invites ADD COLUMN created_by INTEGER DEFAULT NULL");
+    }
   }
 
   globalDb.__socialDbMigrated = true;

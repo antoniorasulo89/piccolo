@@ -3,6 +3,7 @@ import { NextResponse } from "next/server";
 import { recordAuditLog } from "@/lib/admin";
 import { withAdmin } from "@/lib/admin-guard";
 import { execute, queryOne } from "@/lib/db";
+import { sendPasswordResetEmail } from "@/lib/email";
 import { jsonError } from "@/lib/http";
 
 type Context = {
@@ -63,6 +64,8 @@ export async function POST(request: Request, context: Context) {
 
     const resetUrl = new URL("/reset-password", request.url);
     resetUrl.searchParams.set("token", token);
+
+    sendPasswordResetEmail(user.email, resetUrl.toString()).catch(() => {});
 
     return NextResponse.json({
       resetUrl: resetUrl.toString(),

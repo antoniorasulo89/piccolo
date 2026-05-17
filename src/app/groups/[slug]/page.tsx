@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { LockKey, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import { notFound, redirect } from "next/navigation";
+import { GroupInviteButton } from "@/components/GroupInviteButton";
 import { GroupJoinButton } from "@/components/GroupJoinButton";
 import { GroupPostComposer } from "@/components/GroupPostComposer";
 import { GroupRequestButton } from "@/components/GroupRequestButton";
 import { PaginationLinks } from "@/components/PaginationLinks";
+import { PinPostButton } from "@/components/PinPostButton";
 import { PostCard } from "@/components/PostCard";
 import { UserAvatar } from "@/components/UserAvatar";
 import { getCurrentUser } from "@/lib/auth";
@@ -61,6 +63,11 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
               <p className="mt-3 font-mono text-xs text-charcoal/42">
                 {group.members_count} membri / {group.posts_count} post / owner {group.owner_name}
               </p>
+              {canModerate ? (
+                <div className="mt-3">
+                  <GroupInviteButton groupId={group.id} />
+                </div>
+              ) : null}
             </div>
 
             {!group.is_member ? (
@@ -80,7 +87,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             Gruppo privato.
           </h2>
           <p className="mt-2 max-w-[58ch] leading-7 text-charcoal/58">
-            I contenuti sono visibili solo ai membri. Richiedi accesso per partecipare.
+            Solo i membri approvati possono vedere contenuti e conversazioni.
           </p>
         </section>
       ) : (
@@ -90,9 +97,26 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
 
             <div className="mt-5 grid gap-3 rounded-lg border border-charcoal/10 bg-surface p-3 sm:p-5">
               {visiblePosts.length ? (
-                visiblePosts.map((post, i) => (
-                  <PostCard key={post.id} post={post} currentUserId={user.id} staggerIndex={i} />
-                ))
+                visiblePosts.map((post, i) => {
+                  const isPinned = "pinned_at" in post ? Boolean(post.pinned_at) : false;
+                  return (
+                    <div key={post.id} className="relative">
+                      {isPinned ? (
+                        <div className="mb-1 flex items-center gap-2 px-1">
+                          <span className="rounded-md bg-amber-100 px-2 py-0.5 font-mono text-[0.62rem] font-semibold uppercase tracking-[0.1em] text-amber-900">
+                            Fissato
+                          </span>
+                          {canModerate ? <PinPostButton postId={post.id} pinned /> : null}
+                        </div>
+                      ) : canModerate ? (
+                        <div className="absolute right-2 top-2 z-10">
+                          <PinPostButton postId={post.id} pinned={false} />
+                        </div>
+                      ) : null}
+                      <PostCard key={post.id} post={post} currentUserId={user.id} staggerIndex={i} />
+                    </div>
+                  );
+                })
               ) : (
                 <div className="p-8">
                   <h2 className="text-xl font-semibold tracking-tight text-charcoal">
@@ -118,7 +142,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
               </p>
               <p className="mt-2 text-sm leading-6 text-charcoal/62">
                 {group.is_member
-                  ? `Sei membro del gruppo come ${group.viewer_role}.`
+                  ? `Sei ${group.viewer_role === "owner" ? "owner" : group.viewer_role === "moderator" ? "moderator" : "membro"} del gruppo.`
                   : "Puoi leggere i gruppi pubblici, ma devi entrare per pubblicare."}
               </p>
             </div>
@@ -126,7 +150,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             {canModerate && requests.length ? (
               <div className="mt-4 rounded-lg border border-charcoal/10 bg-surface p-5">
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">
-                  Richieste
+                  Richieste in attesa
                 </p>
                 <div className="mt-3 grid gap-3">
                   {requests.map((request) => (
@@ -147,6 +171,19 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
                     </article>
                   ))}
                 </div>
+              </div>
+            ) : null}
+
+            {group.is_member ? (
+              <div className="mt-4 rounded-lg border border-charcoal/10 bg-paper/64 p-5">
+                <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">
+                  Come funziona
+                </p>
+                <p className="mt-2 text-sm leading-6 text-charcoal/58">
+                  {canModerate
+                    ? "Puoi creare link di invito, gestire le richieste di accesso e fissare post importanti in cima alla pagina."
+                    : "Scrivi post, commenta e interagisci con gli altri membri del gruppo."}
+                </p>
               </div>
             ) : null}
           </aside>
