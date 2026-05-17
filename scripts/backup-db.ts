@@ -14,7 +14,7 @@ const FTS_SHADOW_PREFIXES = ["post_fts_"];
 
 function isFtsRelated(name: string, type: string) {
   if (FTS_SHADOW_PREFIXES.some((p) => name.startsWith(p))) return true;
-  if (type === "trigger" && (name.includes("_fts_") || name.includes("_fts"))) return true;
+  if (type === "trigger" && name.includes("_fts_")) return true;
   return false;
 }
 

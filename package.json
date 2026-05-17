@@ -11,6 +11,7 @@
     "lint": "eslint",
     "audit:admin": "node scripts/audit-admin-routes.mjs",
     "test:e2e": "playwright test",
+    "test:restore": "tsx scripts/test-backup-restore.ts",
     "secrets:scan": "gitleaks detect --no-git --redact --source ."
   },
   "dependencies": {

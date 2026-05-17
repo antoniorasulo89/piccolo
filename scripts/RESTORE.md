@@ -87,3 +87,4 @@ Output atteso: `✓ Restore verificato: tutti i conteggi corrispondono.`
 - Retention: 90 giorni su GitHub Artifacts
 - Frequenza: ogni domenica alle 04:00 UTC + workflow_dispatch manuale
 - Per eseguire il backup manualmente: Actions → Backup Turso → Run workflow
+- **Dopo il restore, esegui `npm run db:init`** per ricreare le tabelle virtuali FTS (`post_fts`) e i relativi trigger, che non sono inclusi nel dump SQL
