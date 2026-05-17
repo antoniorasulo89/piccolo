@@ -3,7 +3,7 @@
 import { ArrowRight, UsersThree } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { showToast } from "@/components/ToastProvider";
 
 export default function GroupJoinPage() {
@@ -14,9 +14,8 @@ export default function GroupJoinPage() {
   const [joined, setJoined] = useState(false);
   const [error, setError] = useState("");
 
-  useEffect(() => {
-    if (!token) setError("Link non valido. Manca il token di invito.");
-  }, [token]);
+  const tokenMissingError = !token ? "Link non valido. Manca il token di invito." : "";
+  const visibleError = error || tokenMissingError;
 
   function join() {
     if (!token) return;
@@ -41,13 +40,13 @@ export default function GroupJoinPage() {
     });
   }
 
-  if (!token || error) {
+  if (!token || visibleError) {
     return (
       <main className="mx-auto grid min-h-[calc(100dvh-4rem)] max-w-xl place-items-center px-4 text-center">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-fern-900">Invito</p>
           <h1 className="mt-4 text-3xl font-semibold tracking-tight text-charcoal">
-            {error || "Link non valido."}
+            {visibleError || "Link non valido."}
           </h1>
           <p className="mt-3 max-w-[48ch] mx-auto leading-7 text-charcoal/55">
             Il link di invito non e valido o e scaduto. Chiedi un nuovo link a chi gestisce il gruppo.
