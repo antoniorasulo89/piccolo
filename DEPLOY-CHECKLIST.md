@@ -1,8 +1,15 @@
 # Deploy Checklist — Piccolo
 
-Dopo ogni deploy (Vercel CLI `--prod`, Git push, o "Redeploy without build cache"):
+## Configurazione Vercel (una tantum)
 
-## Verifica alias
+Verifica in [Vercel Dashboard → my-social → Settings → Git](https://vercel.com/antonior89-s-projects/my-social/settings/git):
+
+- **Production Branch**: deve essere `master`
+- **Auto-assign custom production domains**: deve essere **attivo** (spuntato)
+
+Senza questa opzione, ogni `git push` crea un deployment Ready ma **non promuove** l'alias `my-social-hazel.vercel.app`. Prod rimane sul deployment precedente.
+
+## Dopo ogni deploy
 
 ```bash
 curl -sI https://my-social-hazel.vercel.app/api/auth/me
@@ -18,16 +25,17 @@ curl -s https://my-social-hazel.vercel.app/api/health
 
 ## Se fallisce
 
-Se uno dei due mostra:
+Se uno dei due mostra `X-Matched-Path: /_not-found` o `Content-Type: text/html` o `404`:
 
-- `X-Matched-Path: /_not-found`
-- `Content-Type: text/html`
-- `404`
+1. Vai su [Deployments](https://vercel.com/antonior89-s-projects/my-social/deployments)
+2. Trova l'ultimo deployment `Ready` (non `Error`)
+3. Clicca `...` → `Promote to Production`
+4. Riesegui i curl sopra
 
-→ L'alias prod non e promosso al deployment corrente. Vai su [Vercel Dashboard → my-social → Deployments](https://vercel.com/antonior89-s-projects/my-social/deployments), trova il deployment corretto, clicca `...` → `Promote to Production`.
+In alternativa, da CLI: `npx vercel deploy --prod --yes` forza promozione immediata.
 
 ## Note
 
-- Dopo `--force` deploy, la propagazione alias puo richiedere fino a 60s.
-- Il raw deployment URL (es. `my-social-abc123.vercel.app`) ha Vercel SSO attivo e non e usabile per test API.
-- Verificare sempre sull'alias `my-social-hazel.vercel.app`.
+- Dopo `--force` deploy, l'alias puo richiedere fino a 60s per propagarsi.
+- Il raw deployment URL (es. `my-social-abc123.vercel.app`) ha Vercel Deployment Protection attivo.
+- Verificare **sempre** sull'alias `my-social-hazel.vercel.app`, mai sul raw URL.
