@@ -8,6 +8,8 @@ Costruito con Next.js, SQLite/Turso, JWT, Resend e Tailwind CSS.
 
 Beta privata pronta per pilot controllato.
 
+Ultima verifica locale: lint, build, audit route, secret scan ed E2E Playwright verdi. `npm audit` segnala 2 vulnerabilità moderate transitive in `postcss` via Next.js, monitorate perché il fix automatico propone un downgrade breaking.
+
 - Deploy: Vercel
 - Database: SQLite locale / Turso cloud
 - Auth: email/password, JWT in cookie `httpOnly`
@@ -29,6 +31,7 @@ Beta privata pronta per pilot controllato.
 - Preferenze tema: light, dark, system.
 - Onboarding post-registrazione.
 - Follow/unfollow con UI ottimistica.
+- Blocco utente con rimozione dei follow reciproci e filtri su feed, ricerca, profili, DM, notifiche, gruppi e bookmark.
 
 ### Feed e contenuti
 
@@ -67,6 +70,9 @@ Beta privata pronta per pilot controllato.
 - Messaggi live nella conversazione aperta tramite polling incrementale `since`.
 - Badge unread desktop/mobile condivisi da hook singleton.
 - Read state per conversazione tramite `last_read_at`.
+- Gestione chat di gruppo: rinomina, aggiunta membri, rimozione membri, lascia conversazione e archiviazione personale.
+- Owner conversazione e admin possono gestire i membri; i membri normali possono lasciare o archiviare.
+- Le conversazioni lasciate o archiviate non contribuiscono al badge unread.
 
 ### Notifiche
 
@@ -107,6 +113,9 @@ Beta privata pronta per pilot controllato.
 - Rate limit in-memory per login, register, forgot-password, post e creazione gruppi.
 - Token sensibili salvati come hash SHA256.
 - Protezione open redirect su `?redirect=`.
+- Whitelist host immagini condivisa tra schema Zod e `next.config`.
+- Admin override esplicito sulle API con permessi role-based.
+- Block utente bidirezionale applicato alle superfici social critiche.
 - Header sicurezza in produzione:
   - `Strict-Transport-Security`
   - `X-Frame-Options`
@@ -124,8 +133,8 @@ Beta privata pronta per pilot controllato.
 - Checklist post-deploy in `DEPLOY-CHECKLIST.md`.
 - Healthcheck: `/api/health`.
 - Backup Turso con workflow GitHub Actions.
-- Smoke restore locale con `npm run test:restore`.
-- E2E Playwright per flow critici.
+- Smoke restore locale con `npm run test:restore` (richiede variabili Turso reali).
+- E2E Playwright per flow critici: admin suspend, follow/unfollow, register/post/like.
 - Migrazioni DB idempotenti.
 
 ## Setup locale
@@ -198,6 +207,17 @@ npm run test:e2e      # Playwright E2E tests
 npm run test:restore  # Smoke test backup restore (richiede env Turso)
 npm run secrets:scan  # Gitleaks scan
 ```
+
+Stato atteso dei gate su un ambiente configurato:
+
+- `npm run audit:tracked` -> 6/6 route auth tracciate
+- `npm run audit:admin` -> 9/9 route admin protette
+- `npm run lint` -> 0 errori
+- `npm run build` -> build Next completa
+- `npm run test:e2e` -> 3/3 test passati
+- `npm run secrets:scan` -> no leaks
+
+`npm audit` può restituire 2 moderate transitive su `postcss` via Next.js. Non usare `npm audit fix --force`: propone una risoluzione breaking.
 
 ## Deploy
 
@@ -276,6 +296,31 @@ npm run db:init
 - Dopo ogni implementazione, verificare che i file dichiarati siano tracciati da Git.
 - Per API con Zod, verificare sempre che il client invii body coerenti con lo schema.
 - Per feature live/polling, verificare anche lo stato server collegato: unread, `last_read_at`, notifiche.
+- Per ogni query SQL parametrizzata modificata, contare placeholder `?` e lunghezza dell'array args.
+- Per ogni API role-based, verificare esplicitamente l'override admin o dichiarare l'eccezione.
+- Verificare il deploy sul dominio canonico dopo ogni push, non solo sul raw deployment URL.
+
+## Protocollo di verifica Team A/B/C
+
+Regole permanenti usate per chiudere gli sprint:
+
+1. `git ls-files <path>` su ogni file dichiarato.
+2. Gate npm eseguiti davvero, E2E incluso quando richiesto.
+3. Coerenza tra body client e schema Zod server.
+4. Grep esplicito per falsificare claim come "tutto auditato" o "tutte le route protette".
+5. Verifica deploy via Git auto, non via working tree locale.
+6. Gate npm in sequenza, perché alcuni toccano filesystem condivisi.
+7. Numero file dichiarato uguale a `git show --name-only <sha>`.
+8. Admin override su ogni role check, salvo eccezione motivata.
+9. Placeholder SQL `?` e args devono combaciare in ogni query modificata.
+
+## Backlog noto
+
+- Aumentare copertura E2E sui flussi nuovi: inviti gruppo, DM gruppo, block utente.
+- Monitorare upgrade Next.js per le 2 moderate transitive `postcss`.
+- Valutare rate limit persistente se il traffico supera il profilo single-instance.
+- Split di `db.ts` e `queries.ts` al prossimo verticale importante.
+- `test:restore` richiede env Turso reali e non è un gate locale universale.
 
 ## Licenza e visibilità
 
