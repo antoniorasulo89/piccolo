@@ -11,16 +11,16 @@ type AdminContentProps = {
   posts: Awaited<ReturnType<typeof getAdminPosts>>;
   commentsPage: number;
   postsPage: number;
-  paginationParams: Record<string, number>;
+  basePath: string;
 };
 
-export function AdminContent({ comments, posts, commentsPage, postsPage, paginationParams }: AdminContentProps) {
+export function AdminContent({ comments, posts, commentsPage, postsPage, basePath }: AdminContentProps) {
   const visibleComments = pageItems(comments);
   const visiblePosts = pageItems(posts);
 
   return (
     <>
-      <section id="contenuti" className="mt-8">
+      <section>
         <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Moderazione commenti</h2>
         <p className="mt-1 text-sm text-charcoal/50">Ultime risposte pubblicate, con rimozione rapida se serve.</p>
 
@@ -53,10 +53,10 @@ export function AdminContent({ comments, posts, commentsPage, postsPage, paginat
             </div>
           )}
         </div>
-        <PaginationLinks page={commentsPage} hasNext={hasNextPage(comments)} basePath="/admin" pageParam="commentsPage" params={paginationParams} />
+        <PaginationLinks page={commentsPage} hasNext={hasNextPage(comments)} basePath={basePath} pageParam="commentsPage" />
       </section>
 
-      <div className="mt-8">
+      <section>
         <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Moderazione post</h2>
         <p className="mt-1 text-sm text-charcoal/50">Ultimi contenuti pubblicati, ordinati dal più recente.</p>
 
@@ -88,8 +88,8 @@ export function AdminContent({ comments, posts, commentsPage, postsPage, paginat
             </div>
           )}
         </div>
-        <PaginationLinks page={postsPage} hasNext={hasNextPage(posts)} basePath="/admin" pageParam="postsPage" params={paginationParams} />
-      </div>
+        <PaginationLinks page={postsPage} hasNext={hasNextPage(posts)} basePath={basePath} pageParam="postsPage" />
+      </section>
     </>
   );
 }

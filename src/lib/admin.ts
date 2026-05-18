@@ -33,8 +33,23 @@ export type AuditLog = {
   target_type: string;
   target_id: number;
   note: string;
+  admin_override: 0 | 1;
   created_at: string;
   admin_name: string;
+};
+
+export type AdminGroupRow = {
+  id: number;
+  name: string;
+  slug: string;
+  privacy: string;
+  description: string;
+  created_at: string;
+  owner_name: string;
+  owner_id: number;
+  members_count: number;
+  posts_count: number;
+  pending_requests: number;
 };
 
 export type AdminPost = {
@@ -188,25 +203,90 @@ export async function recordAuditLog({
 }) {
   return execute(
     `
-      INSERT INTO audit_logs (admin_id, action, target_type, target_id, note)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO audit_logs (admin_id, action, target_type, target_id, note, admin_override)
+      VALUES (?, ?, ?, ?, ?, ?)
     `,
-    [adminId, action, targetType, targetId, note],
+    [adminId, action, targetType, targetId, note, note.includes("admin_override=true") ? 1 : 0],
   );
 }
 
-export async function getAuditLogs(page = 0) {
+export async function getAuditLogs(
+  page = 0,
+  filters?: { action?: string; adminOverride?: boolean; from?: string; to?: string },
+) {
   const offset = Math.max(page, 0) * PAGE_SIZE;
+  const clauses: string[] = [];
+  const args: (string | number)[] = [];
+
+  if (filters?.action) {
+    clauses.push("a.action = ?");
+    args.push(filters.action);
+  }
+  if (filters?.adminOverride) {
+    clauses.push("a.admin_override = 1");
+  }
+  if (filters?.from) {
+    clauses.push("a.created_at >= ?");
+    args.push(filters.from);
+  }
+  if (filters?.to) {
+    clauses.push("a.created_at <= ?");
+    args.push(filters.to);
+  }
+
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
 
   return queryAll<AuditLog>(
     `
-      SELECT a.id, a.action, a.target_type, a.target_id, a.note, a.created_at,
+      SELECT a.id, a.action, a.target_type, a.target_id, a.note, a.admin_override, a.created_at,
         u.name AS admin_name
       FROM audit_logs a
       JOIN users u ON u.id = a.admin_id
+      ${where}
       ORDER BY a.created_at DESC
       LIMIT ? OFFSET ?
     `,
-    [PAGE_LIMIT, offset],
+    [...args, PAGE_LIMIT, offset],
+  );
+}
+
+export async function getAdminGroups(filters?: {
+  q?: string;
+  privacy?: string;
+  ownerId?: number;
+  page?: number;
+}) {
+  const page = filters?.page ?? 0;
+  const offset = Math.max(page, 0) * PAGE_SIZE;
+  const clauses: string[] = [];
+  const args: (string | number)[] = [];
+
+  if (filters?.q) {
+    clauses.push("(g.name LIKE ? OR g.description LIKE ?)");
+    args.push(`%${filters.q}%`, `%${filters.q}%`);
+  }
+  if (filters?.privacy) {
+    clauses.push("g.privacy = ?");
+    args.push(filters.privacy);
+  }
+  if (filters?.ownerId) {
+    clauses.push("g.owner_id = ?");
+    args.push(filters.ownerId);
+  }
+
+  const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";
+
+  return queryAll<AdminGroupRow>(
+    `SELECT g.id, g.name, g.slug, g.privacy, g.description, g.created_at,
+       u.name AS owner_name, g.owner_id,
+       (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id AND gm.status = 'active') AS members_count,
+       (SELECT COUNT(*) FROM posts p WHERE p.group_id = g.id) AS posts_count,
+       (SELECT COUNT(*) FROM group_requests gr WHERE gr.group_id = g.id AND gr.status = 'pending') AS pending_requests
+     FROM groups g
+     JOIN users u ON u.id = g.owner_id
+     ${where}
+     ORDER BY g.created_at DESC
+     LIMIT ? OFFSET ?`,
+    [...args, PAGE_LIMIT, offset],
   );
 }

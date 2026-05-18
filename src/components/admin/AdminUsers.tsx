@@ -3,22 +3,23 @@ import { AdminPasswordResetButton } from "@/components/AdminPasswordResetButton"
 import { AdminRoleButton } from "@/components/AdminRoleButton";
 import { AdminSuspendButton } from "@/components/AdminSuspendButton";
 import { PaginationLinks } from "@/components/PaginationLinks";
-import { hasNextPage, pageItems } from "@/lib/pagination";
 import { getAdminUsers } from "@/lib/admin";
+import { hasNextPage, pageItems } from "@/lib/pagination";
 import { formatDate } from "./AdminStats";
 
 type AdminUsersProps = {
   users: Awaited<ReturnType<typeof getAdminUsers>>;
   page: number;
   currentUserId: number;
-  paginationParams: Record<string, number>;
+  basePath: string;
+  pageParam: string;
 };
 
-export function AdminUsers({ users, page, currentUserId, paginationParams }: AdminUsersProps) {
+export function AdminUsers({ users, page, currentUserId, basePath, pageParam }: AdminUsersProps) {
   const visibleUsers = pageItems(users);
 
   return (
-    <section id="utenti">
+    <section>
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Utenti</h2>
@@ -64,7 +65,7 @@ export function AdminUsers({ users, page, currentUserId, paginationParams }: Adm
           <div className="p-8 text-charcoal/58">Nessun utente registrato.</div>
         )}
       </div>
-      <PaginationLinks page={page} hasNext={hasNextPage(users)} basePath="/admin" pageParam="usersPage" params={paginationParams} />
+      <PaginationLinks page={page} hasNext={hasNextPage(users)} basePath={basePath} pageParam={pageParam} />
     </section>
   );
 }

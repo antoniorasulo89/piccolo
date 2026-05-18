@@ -504,6 +504,14 @@ export async function migrate() {
   }
   await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_group ON notifications(group_id)");
 
+  const auditColumns = await db.execute("PRAGMA table_info(audit_logs)");
+  const hasAdminOverride = auditColumns.rows.some((column) => column.name === "admin_override");
+  if (!hasAdminOverride) {
+    await db.execute("ALTER TABLE audit_logs ADD COLUMN admin_override INTEGER NOT NULL DEFAULT 0");
+    await db.execute("UPDATE audit_logs SET admin_override = 1 WHERE note LIKE '%admin_override=true%'");
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_audit_admin_override ON audit_logs(admin_override)");
+  }
+
   globalDb.__socialDbMigrated = true;
 }
 
