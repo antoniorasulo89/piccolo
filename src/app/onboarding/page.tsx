@@ -23,7 +23,7 @@ export default async function OnboardingPage() {
           Dai un contesto al tuo profilo.
         </h1>
         <p className="mt-4 max-w-[58ch] leading-7 text-charcoal/60">
-          Basta una riga: aiuta gli altri utenti a capire cosa condividi e rende la directory piu utile.
+          Basta una riga: aiuta gli altri utenti a capire cosa condividi e rende la directory più utile.
         </p>
         <OnboardingForm initialBio={user.bio} />
       </section>
@@ -32,7 +32,7 @@ export default async function OnboardingPage() {
           Poi
         </p>
         <p className="mt-3 leading-7">
-          Dopo questo passaggio ti porto in Esplora, cosi puoi trovare persone da seguire e popolare il feed.
+          Dopo questo passaggio ti porto in Esplora, così puoi trovare persone da seguire e popolare il feed.
         </p>
       </aside>
     </main>

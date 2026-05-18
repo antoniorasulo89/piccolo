@@ -78,13 +78,13 @@ export async function POST(request: Request, context: Context) {
     "SELECT 1 FROM group_members WHERE group_id = ? AND user_id = ? AND status = 'active'",
     [groupId, data.userId],
   );
-  if (alreadyMember) return jsonError("L'utente e' gia' membro del gruppo.", 409);
+  if (alreadyMember) return jsonError("L'utente è già membro del gruppo.", 409);
 
   const pendingInvite = await queryOne<{ id: number }>(
     "SELECT id FROM group_member_invites WHERE group_id = ? AND invited_user_id = ? AND status = 'pending'",
     [groupId, data.userId],
   );
-  if (pendingInvite) return jsonError("L'utente ha gia' un invito in attesa.", 409);
+  if (pendingInvite) return jsonError("L'utente ha già un invito in attesa.", 409);
 
   const expiresAt = data.expires_in_hours
     ? new Date(Date.now() + data.expires_in_hours * 60 * 60 * 1000).toISOString().slice(0, 19).replace("T", " ")

@@ -36,6 +36,6 @@ In alternativa, da CLI: `npx vercel deploy --prod --yes` forza promozione immedi
 
 ## Note
 
-- Dopo `--force` deploy, l'alias puo richiedere fino a 60s per propagarsi.
+- Dopo `--force` deploy, l'alias può richiedere fino a 60s per propagarsi.
 - Il raw deployment URL (es. `my-social-abc123.vercel.app`) ha Vercel Deployment Protection attivo.
 - Verificare **sempre** sull'alias `my-social-hazel.vercel.app`, mai sul raw URL.

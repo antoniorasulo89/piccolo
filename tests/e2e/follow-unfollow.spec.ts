@@ -25,7 +25,7 @@ test("follow -> unfollow", async ({ page, request }) => {
 
   await page.goto(`/profile/${target.id}`);
   await page.getByRole("button", { name: "Segui" }).click();
-  await expect(page.getByRole("button", { name: "Segui gia" })).toBeVisible();
-  await page.getByRole("button", { name: "Segui gia" }).click();
+  await expect(page.getByRole("button", { name: "Segui già" })).toBeVisible();
+  await page.getByRole("button", { name: "Segui già" }).click();
   await expect(page.getByRole("button", { name: "Segui" })).toBeVisible();
 });

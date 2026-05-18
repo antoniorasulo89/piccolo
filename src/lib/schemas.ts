@@ -68,11 +68,15 @@ const httpsUrlSchema = z
   .refine((value) => {
     if (!value) return true;
     try {
-      return new URL(value).protocol === "https:";
+      const url = new URL(value);
+      return (
+        url.protocol === "https:" &&
+        ["images.unsplash.com", "avatars.githubusercontent.com", "lh3.googleusercontent.com", "res.cloudinary.com"].includes(url.hostname)
+      );
     } catch {
       return false;
     }
-  }, "Usa un URL HTTPS valido.")
+  }, "Usa un URL HTTPS valido da un dominio immagini consentito, oppure carica un file.")
   .optional()
   .default("");
 

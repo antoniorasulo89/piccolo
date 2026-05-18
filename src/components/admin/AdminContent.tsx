@@ -58,7 +58,7 @@ export function AdminContent({ comments, posts, commentsPage, postsPage, paginat
 
       <div className="mt-8">
         <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Moderazione post</h2>
-        <p className="mt-1 text-sm text-charcoal/50">Ultimi contenuti pubblicati, ordinati dal piu recente.</p>
+        <p className="mt-1 text-sm text-charcoal/50">Ultimi contenuti pubblicati, ordinati dal più recente.</p>
 
         <div className="mt-4 rounded-lg border border-charcoal/10 bg-surface">
           {visiblePosts.length ? (
@@ -84,7 +84,7 @@ export function AdminContent({ comments, posts, commentsPage, postsPage, paginat
           ) : (
             <div className="p-8">
               <h3 className="font-semibold text-charcoal">Nessun post da moderare.</h3>
-              <p className="mt-1 text-sm text-charcoal/55">Quando la community pubblichera contenuti, appariranno qui.</p>
+              <p className="mt-1 text-sm text-charcoal/55">Quando la community pubblicherà contenuti, appariranno qui.</p>
             </div>
           )}
         </div>

@@ -20,7 +20,7 @@ export default async function ResetPasswordPage({
           Imposta una nuova chiave di accesso.
         </h1>
         <p className="mt-4 leading-7 text-charcoal/58">
-          Il link e monouso e scade dopo 30 minuti. Dopo il reset puoi rientrare con la nuova password.
+          Il link è monouso e scade dopo 30 minuti. Dopo il reset puoi rientrare con la nuova password.
         </p>
 
         {token ? (

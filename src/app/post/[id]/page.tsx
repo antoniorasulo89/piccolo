@@ -82,7 +82,7 @@ export default async function PostPage({ params }: PostPageProps) {
               Nessuna risposta, per ora.
             </h2>
             <p className="mt-2 max-w-[56ch] leading-7 text-charcoal/58">
-              Apri la conversazione con un commento breve: il post avra subito piu contesto.
+              Apri la conversazione con un commento breve: il post avrà subito più contesto.
             </p>
           </div>
         )}

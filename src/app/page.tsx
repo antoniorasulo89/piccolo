@@ -46,7 +46,7 @@ const FEATURES: FeatureItem[] = [
   },
   {
     title: "Profili",
-    text: "Identita curate, privacy regolabile, notifiche personalizzate.",
+    text: "Identità curate, privacy regolabile, notifiche personalizzate.",
     icon: UserPlus,
     tone: "fern",
   },
@@ -82,7 +82,7 @@ export default async function Home() {
             Il social piccolo per le community che contano.
           </h1>
           <p className="mt-6 max-w-[58ch] text-lg leading-8 text-charcoal/60">
-            Crea uno spazio privato, leggero e controllato dove il tuo gruppo puo
+            Crea uno spazio privato, leggero e controllato dove il tuo gruppo può
             pubblicare, commentare, scriversi e collaborare senza il rumore dei grandi social.
           </p>
           <div className="mt-8 flex flex-col gap-3 sm:flex-row">
@@ -97,7 +97,7 @@ export default async function Home() {
               href="/login"
               className="inline-flex h-11 items-center justify-center rounded-lg border border-charcoal/10 px-5 text-sm font-semibold text-charcoal/70 transition hover:border-charcoal/25 hover:text-charcoal active:translate-y-px"
             >
-              Ho gia un account
+              Ho già un account
             </Link>
           </div>
         </div>
@@ -177,15 +177,15 @@ export default async function Home() {
         </div>
       </section>
 
-      {/* Per chi e */}
+      {/* Per chi è */}
       <section className="mx-auto max-w-7xl px-4 py-16 sm:px-6 lg:px-8 lg:py-24">
         <div className="grid gap-8 lg:grid-cols-[minmax(0,1.2fr)_2fr] lg:items-start">
           <div>
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.22em] text-clay-900">
-              Per chi e
+              Per chi è
             </p>
             <h2 className="mt-3 text-4xl font-semibold tracking-tight text-charcoal">
-              Piccolo non e per tutti. Ed e un vantaggio.
+              Piccolo non è per tutti. Ed è un vantaggio.
             </h2>
             <p className="mt-4 max-w-[38ch] leading-7 text-charcoal/55">
               Non serve essere un social enorme per funzionare bene. A volte basta uno spazio della misura giusta.

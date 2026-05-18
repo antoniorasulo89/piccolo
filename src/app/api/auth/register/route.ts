@@ -18,7 +18,7 @@ export async function POST(request: Request) {
   }
 
   if (!rateLimit(rateLimitKey(request, "register", email || "empty"), 5, 10 * 60_000)) {
-    return jsonError("Troppe registrazioni dallo stesso browser. Riprova piu tardi.", 429);
+    return jsonError("Troppe registrazioni dallo stesso browser. Riprova più tardi.", 429);
   }
 
   const passwordHash = await bcrypt.hash(password, 12);
@@ -41,7 +41,7 @@ export async function POST(request: Request) {
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes("UNIQUE")) {
-      return jsonError("Esiste gia un account con questa email.", 409);
+      return jsonError("Esiste già un account con questa email.", 409);
     }
 
     return jsonError("Registrazione non riuscita.", 500);

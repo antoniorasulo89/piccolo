@@ -24,7 +24,7 @@ export async function POST(request: Request, context: Context) {
   }
 
   if (!rateLimit(rateLimitKey(request, "report", user.id), 8, 10 * 60_000)) {
-    return jsonError("Troppe segnalazioni in poco tempo. Riprova piu tardi.", 429);
+    return jsonError("Troppe segnalazioni in poco tempo. Riprova più tardi.", 429);
   }
 
   const post = await queryOne<{ id: number; user_id: number }>(
@@ -54,7 +54,7 @@ export async function POST(request: Request, context: Context) {
     );
   } catch (error) {
     if (error instanceof Error && error.message.includes("UNIQUE")) {
-      return jsonError("Hai gia segnalato questo post.", 409);
+      return jsonError("Hai già segnalato questo post.", 409);
     }
 
     return jsonError("Segnalazione non riuscita.", 500);

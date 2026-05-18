@@ -30,7 +30,7 @@ export async function POST(request: Request) {
     memberIds,
   );
   if (existingUsers.length !== Array.from(new Set(memberIds)).length) {
-    return jsonError("Uno o piu utenti non esistono.", 404);
+    return jsonError("Uno o più utenti non esistono.", 404);
   }
 
   const conversationId = await createConversation({

@@ -42,7 +42,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
         </h1>
         <p className="mt-4 max-w-[62ch] leading-7 text-charcoal/60">
           Cerca per nome, email o bio. Usa i filtri per distinguere chi segui
-          gia dagli utenti appena arrivati.
+          già dagli utenti appena arrivati.
         </p>
       </section>
 
@@ -144,7 +144,7 @@ export default async function ExplorePage({ searchParams }: ExplorePageProps) {
             <p className="mt-2 max-w-[52ch] leading-7 text-charcoal/58">
               {search
                 ? "Prova con un nome, una email o una parola diversa."
-                : "Quando qualcuno si registrera, apparira qui e potrai seguirlo."}
+                : "Quando qualcuno si registrerà, apparirà qui e potrai seguirlo."}
             </p>
           </div>
         )}

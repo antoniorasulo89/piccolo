@@ -33,7 +33,7 @@ export default async function LoginPage({ searchParams }: LoginPageProps) {
       <aside className="hidden border-l border-charcoal/10 pl-12 text-charcoal/58 lg:block">
         <p className="max-w-[42ch] text-lg leading-8">
           Il login usa cookie httpOnly e JWT firmato. Il frontend non legge mai
-          il token: chiede solo al server cosa puo fare.
+          il token: chiede solo al server cosa può fare.
         </p>
       </aside>
     </main>

@@ -93,7 +93,7 @@ export function MessagesClient({ initial }: MessagesClientProps) {
         <div className="rounded-lg border border-charcoal/10 bg-surface p-8">
           <h2 className="text-xl font-semibold tracking-tight text-charcoal">Nessuna conversazione.</h2>
           <p className="mt-2 max-w-[52ch] leading-7 text-charcoal/58">
-            Apri un DM con un profilo o crea una chat privata con piu persone.
+            Apri un DM con un profilo o crea una chat privata con più persone.
           </p>
         </div>
       )}

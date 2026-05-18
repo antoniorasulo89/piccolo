@@ -35,7 +35,7 @@ export async function POST(request: Request) {
     "SELECT group_id FROM group_members WHERE group_id = ? AND user_id = ?",
     [groupId, user.id],
   );
-  if (existing) return jsonError("Fai gia parte di questo gruppo.", 409);
+  if (existing) return jsonError("Fai già parte di questo gruppo.", 409);
 
   const group = await queryOne<{ privacy: string }>(
     "SELECT privacy FROM groups WHERE id = ?",

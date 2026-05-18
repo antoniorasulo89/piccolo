@@ -53,7 +53,7 @@ export default function GroupJoinPage() {
             {visibleError || "Link non valido."}
           </h1>
           <p className="mt-3 max-w-[48ch] mx-auto leading-7 text-charcoal/55">
-            Il link di invito non e valido o e scaduto. Chiedi un nuovo link a chi gestisce il gruppo.
+            Il link di invito non è valido o è scaduto. Chiedi un nuovo link a chi gestisce il gruppo.
           </p>
           <Link
             href="/groups"

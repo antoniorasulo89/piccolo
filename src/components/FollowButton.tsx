@@ -54,7 +54,7 @@ export function FollowButton({
       }
     >
       {following ? <UserMinus size={17} weight="bold" /> : <UserPlus size={17} weight="bold" />}
-      {following ? "Segui gia" : "Segui"}
+      {following ? "Segui già" : "Segui"}
     </button>
   );
 }

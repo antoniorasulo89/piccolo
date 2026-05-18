@@ -25,7 +25,7 @@ export default async function MessagesPage() {
             DM e chat di gruppo.
           </h1>
           <p className="mt-4 max-w-[62ch] leading-7 text-charcoal/60">
-            Conversazioni private tra profili, oppure stanze piccole con piu persone.
+            Conversazioni private tra profili, oppure stanze piccole con più persone.
           </p>
         </div>
 

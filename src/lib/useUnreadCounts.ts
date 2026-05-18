@@ -60,7 +60,7 @@ function getSnapshot() {
 }
 
 export function useUnreadCounts(initial?: UnreadData) {
-  const data = useSyncExternalStore(subscribe, getSnapshot);
+  const data = useSyncExternalStore(subscribe, getSnapshot, () => initial ?? null);
 
   useEffect(() => {
     if (initial && !currentData) {

@@ -28,7 +28,7 @@ export async function PATCH(request: Request, context: Context) {
   );
   if (!inviteRow) return jsonError("Invito non trovato.", 404);
   if (inviteRow.invited_user_id !== user.id) return jsonError("Non autorizzato.", 403);
-  if (inviteRow.status !== "pending") return jsonError("Invito non piu' valido.", 409);
+  if (inviteRow.status !== "pending") return jsonError("Invito non più valido.", 409);
   if (inviteRow.expires_at && inviteRow.expires_at <= new Date().toISOString().slice(0, 19).replace("T", " ")) {
     await execute(
       "UPDATE group_member_invites SET status = 'expired', responded_at = CURRENT_TIMESTAMP WHERE id = ?",
@@ -90,7 +90,7 @@ export async function DELETE(request: Request, context: Context) {
     [invite, groupId],
   );
   if (!inviteRow) return jsonError("Invito non trovato.", 404);
-  if (inviteRow.status !== "pending") return jsonError("Invito non piu' valido.", 409);
+  if (inviteRow.status !== "pending") return jsonError("Invito non più valido.", 409);
 
   await execute(
     "UPDATE group_member_invites SET status = 'revoked', responded_at = CURRENT_TIMESTAMP WHERE id = ?",

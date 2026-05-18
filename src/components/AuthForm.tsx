@@ -114,7 +114,7 @@ export function AuthForm({ mode }: AuthFormProps) {
       </button>
 
       <p className="text-sm text-charcoal/55">
-        {isRegister ? "Hai gia un account?" : "Non hai ancora un account?"}{" "}
+        {isRegister ? "Hai già un account?" : "Non hai ancora un account?"}{" "}
         <Link
           href={isRegister ? "/login" : "/register"}
           className="font-semibold text-fern-900 underline-offset-4 hover:underline"

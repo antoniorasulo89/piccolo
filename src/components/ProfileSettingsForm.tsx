@@ -17,12 +17,12 @@ type ProfileSettingsFormProps = {
 function readImageAsDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     if (!file.type.startsWith("image/")) {
-      reject(new Error("Il file deve essere una immagine."));
+      reject(new Error("Il file deve essere un'immagine."));
       return;
     }
 
     if (file.size > 650_000) {
-      reject(new Error("Usa una immagine sotto 650 KB."));
+      reject(new Error("Usa un'immagine sotto 650 KB."));
       return;
     }
 
@@ -123,7 +123,7 @@ export function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
           className="h-11 rounded-lg border border-charcoal/10 bg-paper px-3 text-charcoal outline-none transition placeholder:text-charcoal/35 focus:border-fern-700 focus:ring-4 focus:ring-fern-700/10"
         />
         <p className="text-xs text-charcoal/45">
-          Usa un link HTTPS a una immagine pubblica. Lascia vuoto per usare le iniziali.
+          Usa un link HTTPS da Unsplash, GitHub, Google o Cloudinary. In alternativa carica un file.
         </p>
       </div>
 
@@ -196,7 +196,7 @@ export function ProfileSettingsForm({ user }: ProfileSettingsFormProps) {
           className="text-sm text-charcoal/65 file:mr-3 file:h-9 file:rounded-lg file:border-0 file:bg-charcoal file:px-3 file:text-sm file:font-semibold file:text-paper"
         />
         <p className="text-xs text-charcoal/45">
-          Usa una immagine larga e leggera: 1200x360 px e ideale.
+          Usa un&apos;immagine larga e leggera: 1200x360 px è ideale.
         </p>
       </div>
 

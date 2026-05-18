@@ -1,4 +1,4 @@
-# Piccolo - Meno rumore. Piu relazione.
+# Piccolo - Meno rumore. Più relazione.
 
 Social network privato e leggero per community raccolte: profili, feed, gruppi pubblici/privati, messaggi, notifiche, moderazione e console admin.
 
@@ -14,7 +14,7 @@ Beta privata pronta per pilot controllato.
 - Lingua prodotto: italiano
 - Target: community piccole, corsi, gruppi privati, organizzazioni leggere
 
-## Funzionalita
+## Funzionalità
 
 ### Utenti e profili
 
@@ -49,7 +49,7 @@ Beta privata pronta per pilot controllato.
 - Tab gruppo: Post, Membri, Inviti, Impostazioni.
 - Lista membri con avatar, nome e ruolo.
 - Owner/co-owner/admin possono gestire impostazioni, richieste e inviti.
-- Moderator puo moderare contenuti ed espellere membri normali, senza governare privacy/inviti.
+- Moderator può moderare contenuti ed espellere membri normali, senza governare privacy/inviti.
 - Admin platform ha override completo, tracciato in audit log.
 - Richieste di accesso per gruppi privati.
 - Link invito sicuri con scadenza, numero massimo di utilizzi, revoca e stato.
@@ -157,7 +157,7 @@ Admin iniziali opzionali:
 ADMIN_EMAILS=nome@example.com,altro@example.com
 ```
 
-Se `TURSO_DATABASE_URL` non e presente, l'app usa `data/social.db`.
+Se `TURSO_DATABASE_URL` non è presente, l'app usa `data/social.db`.
 
 ## Variabili ambiente
 
@@ -275,6 +275,8 @@ npm run db:init
 - Per API con Zod, verificare sempre che il client invii body coerenti con lo schema.
 - Per feature live/polling, verificare anche lo stato server collegato: unread, `last_read_at`, notifiche.
 
-## Licenza
+## Licenza e visibilità
 
-Progetto privato. Tutti i diritti riservati.
+Il repository può essere visibile pubblicamente per portfolio, audit e consultazione tecnica, ma il progetto non è open source.
+
+Tutti i diritti sono riservati. Non è concessa licenza di copia, distribuzione, riuso commerciale, modifica o sublicenza senza autorizzazione scritta del titolare.

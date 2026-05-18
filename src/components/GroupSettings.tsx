@@ -92,7 +92,7 @@ export function GroupSettings({ groupId, initialName, initialDescription, initia
         <p className="text-xs text-charcoal/45">
           {privacy === "private"
             ? "Solo i membri possono vedere contenuti e conversazioni."
-            : "Chiunque puo vedere i post del gruppo."}
+            : "Chiunque può vedere i post del gruppo."}
         </p>
       </div>
       <button

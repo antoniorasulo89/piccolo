@@ -98,7 +98,7 @@ export default async function SearchPage({ searchParams }: SearchPageProps) {
                 Nessun post trovato.
               </h2>
               <p className="mt-2 max-w-[52ch] leading-7 text-charcoal/58">
-                Prova con parole piu semplici o cerca direttamente un utente.
+                Prova con parole più semplici o cerca direttamente un utente.
               </p>
             </div>
           )

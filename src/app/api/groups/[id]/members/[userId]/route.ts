@@ -37,10 +37,10 @@ export async function DELETE(request: Request, context: Context) {
 
   if (!isAdmin(user)) {
     if (actorMembership?.role === "moderator") {
-      if (targetMembership.role !== "member") return jsonError("Un moderator puo espellere solo membri.", 403);
+      if (targetMembership.role !== "member") return jsonError("Un moderator può espellere solo membri.", 403);
     }
     if (isCoOwner(actorMembership) && isOwnershipRole(targetMembership.role)) {
-      return jsonError("Un co-owner non puo espellere owner o altri co-owner.", 403);
+      return jsonError("Un co-owner non può espellere owner o altri co-owner.", 403);
     }
   }
 
@@ -78,7 +78,7 @@ export async function PATCH(request: Request, context: Context) {
   if (!isAdmin(user) && !isOwner(actorMembership)) {
     if (isCoOwner(actorMembership)) {
       if (data.role === "co_owner" || isOwnershipRole(targetMembership.role)) {
-        return jsonError("Un co-owner non puo assegnare co_owner o modificare owner/co_owner.", 403);
+        return jsonError("Un co-owner non può assegnare co_owner o modificare owner/co_owner.", 403);
       }
     } else {
       return jsonError("Solo owner, co-owner e admin possono cambiare i ruoli.", 403);
