@@ -172,7 +172,7 @@ export async function getGroupBySlug(slug: string, viewerId: number, page = 0, v
   );
 
   const requests =
-    mapped.viewer_role === "owner" || mapped.viewer_role === "moderator" || viewerIsAdmin
+    mapped.viewer_role === "owner" || mapped.viewer_role === "co_owner" || viewerIsAdmin
       ? await queryAll<GroupRequest>(
           `
             SELECT gr.group_id, gr.user_id, u.name AS user_name, u.avatar_url AS user_avatar_url, gr.created_at
@@ -247,7 +247,8 @@ export async function getPendingGroupRequestsCount(userId: number) {
     `SELECT COUNT(*) AS count
      FROM group_requests gr
      JOIN groups g ON g.id = gr.group_id
-     WHERE g.owner_id = ? AND gr.status = 'pending'`,
+     JOIN group_members gm ON gm.group_id = g.id AND gm.user_id = ? AND gm.status = 'active'
+     WHERE gr.status = 'pending' AND gm.role IN ('owner', 'co_owner')`,
     [userId],
   );
   return row?.count ?? 0;

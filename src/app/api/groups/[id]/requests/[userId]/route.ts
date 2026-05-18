@@ -57,7 +57,7 @@ export async function PATCH(request: Request, context: Context) {
     action: approve ? "group_request_approve" : "group_request_reject",
     targetType: "user",
     targetId: targetUserId,
-    note: `group_id=${groupId}${currentUser.role === "admin" && (!membership || (membership.role !== "owner" && membership.role !== "moderator")) ? " admin_override=true" : ""}`,
+    note: `group_id=${groupId}${currentUser.role === "admin" && (!membership || (membership.role !== "owner" && membership.role !== "co_owner")) ? " admin_override=true" : ""}`,
   });
 
   return NextResponse.json({ ok: true });
