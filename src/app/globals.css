@@ -77,6 +77,9 @@ body {
     radial-gradient(circle at 12% 0%, color-mix(in oklch, var(--clay-100) 48%, transparent) 0, transparent 26rem),
     radial-gradient(circle at 92% 8%, color-mix(in oklch, var(--fern-100) 58%, transparent) 0, transparent 24rem),
     var(--background);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 100%, auto;
   color: var(--foreground);
   font-family: var(--font-geist-sans), sans-serif;
   padding-bottom: env(safe-area-inset-bottom);
@@ -89,6 +92,9 @@ body {
     radial-gradient(circle at 12% 0%, color-mix(in oklch, var(--clay-100) 38%, transparent) 0, transparent 26rem),
     radial-gradient(circle at 92% 8%, color-mix(in oklch, var(--fern-100) 50%, transparent) 0, transparent 24rem),
     var(--background);
+  background-attachment: fixed;
+  background-repeat: no-repeat;
+  background-size: 100% 100%, 100% 100%, auto;
   color-scheme: dark;
 }
 
