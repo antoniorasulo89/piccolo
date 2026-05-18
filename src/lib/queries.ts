@@ -334,7 +334,7 @@ export async function getDiscoverUsers(viewerId: number, search = "") {
       ORDER BY i_follow ASC, u.created_at DESC
       LIMIT 100 OFFSET ?
     `,
-    [viewerId, viewerId, viewerId, term, pattern, pattern, pattern, offset],
+    [viewerId, viewerId, viewerId, viewerId, term, pattern, pattern, pattern, offset],
   );
 
   return rows.map((user) => ({
@@ -392,11 +392,12 @@ export async function getBookmarkedPosts(userId: number, page = 0) {
       JOIN users u ON u.id = p.user_id
       LEFT JOIN likes l ON l.post_id = p.id
       WHERE b.user_id = ? AND p.group_id IS NULL
+        AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)
       GROUP BY p.id
       ORDER BY b.created_at DESC
       LIMIT ? OFFSET ?
     `,
-    [userId, userId, PAGE_LIMIT, offset],
+    [userId, userId, userId, PAGE_LIMIT, offset],
   );
 
   return rows.map(mapPost);

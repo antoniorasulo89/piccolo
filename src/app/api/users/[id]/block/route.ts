@@ -19,12 +19,20 @@ export async function POST(_request: Request, context: Context) {
   const target = await queryOne("SELECT id FROM users WHERE id = ?", [targetId]);
   if (!target) return jsonError("Utente non trovato.", 404);
 
-  const batch: string[] = [
-    `INSERT OR IGNORE INTO user_blocks(blocker_id, blocked_id) VALUES (${user.id}, ${targetId})`,
-    `DELETE FROM follows WHERE (follower_id = ${user.id} AND following_id = ${targetId}) OR (follower_id = ${targetId} AND following_id = ${user.id})`,
-    `DELETE FROM notifications WHERE (user_id = ${user.id} AND actor_id = ${targetId}) OR (user_id = ${targetId} AND actor_id = ${user.id})`,
-  ];
-  await execute(batch.join("; "));
+  await execute(
+    "INSERT OR IGNORE INTO user_blocks(blocker_id, blocked_id) VALUES (?, ?)",
+    [user.id, targetId],
+  );
+
+  await execute(
+    `DELETE FROM follows WHERE (follower_id = ? AND following_id = ?) OR (follower_id = ? AND following_id = ?)`,
+    [user.id, targetId, targetId, user.id],
+  );
+
+  await execute(
+    `DELETE FROM notifications WHERE (user_id = ? AND actor_id = ?) OR (user_id = ? AND actor_id = ?)`,
+    [user.id, targetId, targetId, user.id],
+  );
 
   return NextResponse.json({ blocked: true });
 }

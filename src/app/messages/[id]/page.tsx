@@ -1,10 +1,12 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { ConversationManagePanel } from "@/components/ConversationManagePanel";
 import { MessageComposer } from "@/components/MessageComposer";
 import { MessageList } from "@/components/MessageList";
 import { RefreshCountsOnMount } from "@/components/RefreshCountsOnMount";
 import { UserAvatar } from "@/components/UserAvatar";
 import { getCurrentUser } from "@/lib/auth";
+import { queryOne } from "@/lib/db";
 import { getConversationDetail } from "@/lib/messages";
 
 type MessagePageProps = {
@@ -29,6 +31,12 @@ export default async function MessagePage({ params }: MessagePageProps) {
       .map((member) => member.name)
       .join(", ") ||
     "Conversazione";
+
+  const archivedRow = await queryOne<{ archived_at: string | null }>(
+    "SELECT archived_at FROM conversation_members WHERE conversation_id = ? AND user_id = ?",
+    [conversationId, user.id],
+  );
+  const isArchived = Boolean(archivedRow?.archived_at);
 
   return (
     <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
@@ -67,6 +75,14 @@ export default async function MessagePage({ params }: MessagePageProps) {
         <div className="mt-6 border-t border-charcoal/10 pt-4">
           <MessageComposer conversationId={conversationId} />
         </div>
+
+        <ConversationManagePanel
+          conversationId={conversationId}
+          type={detail.conversation.type}
+          title={title}
+          members={detail.members}
+          isArchived={isArchived}
+        />
       </section>
     </main>
   );

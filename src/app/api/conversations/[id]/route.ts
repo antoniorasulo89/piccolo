@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { execute, queryOne } from "@/lib/db";
+import { isBlocked } from "@/lib/blocks";
+import { execute, queryAll, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { z } from "zod";
 
@@ -80,7 +81,16 @@ export async function DELETE(request: Request, context: Context) {
       [conversationId],
     );
     if (remaining?.count === 0) {
-      await execute("UPDATE conversation_members SET left_at = NULL WHERE conversation_id = ? ORDER BY left_at DESC LIMIT 1", [conversationId]);
+      const lastMember = await queryOne<{ user_id: number }>(
+        "SELECT user_id FROM conversation_members WHERE conversation_id = ? ORDER BY left_at DESC LIMIT 1",
+        [conversationId],
+      );
+      if (lastMember) {
+        await execute(
+          "UPDATE conversation_members SET left_at = NULL WHERE conversation_id = ? AND user_id = ?",
+          [conversationId, lastMember.user_id],
+        );
+      }
     }
 
     return NextResponse.json({ left: true });
@@ -118,6 +128,16 @@ export async function POST(request: Request, context: Context) {
   const { userId: rawUserId } = await request.json().catch(() => ({}));
   const newUserId = Number(rawUserId);
   if (!Number.isInteger(newUserId)) return jsonError("Utente non valido.");
+
+  const activeMembers = await queryAll<{ user_id: number }>(
+    "SELECT user_id FROM conversation_members WHERE conversation_id = ? AND left_at IS NULL",
+    [conversationId],
+  );
+  for (const m of activeMembers) {
+    if (await isBlocked(newUserId, m.user_id)) {
+      return jsonError("Non puoi aggiungere un utente con blocchi attivi verso membri della conversazione.");
+    }
+  }
 
   const exists = await queryOne(
     "SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?",
