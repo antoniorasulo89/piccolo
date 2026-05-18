@@ -25,8 +25,9 @@ Un social network privato e leggero per community raccolte. Costruito con Next.j
 - **Gruppi** pubblici e privati con ruoli (owner/moderator/member)
 - Richieste di accesso per gruppi privati
 - Post di gruppo con moderazione
-- Link di invito con token monouso/N-uso
+- Link di invito con token monouso/N-uso e scadenza configurabile
 - Post fissati in gruppi (annunci, regole)
+- Feed aggregato gruppi: `/feed?scope=groups` mostra i post di tutti i tuoi gruppi
 
 ### Messaggistica
 - **Messaggi diretti** (DM 1:1 e chat di gruppo)
@@ -35,10 +36,10 @@ Un social network privato e leggero per community raccolte. Costruito con Next.j
 - Polling 30s + event bus per refresh badge
 
 ### Notifiche
-- Notifiche per like, commenti, follow
+- Notifiche per like, commenti, follow, post nei gruppi
 - Filtro "solo non lette"
 - Mark all read con un click
-- Preferenze per tipo notifica (opt-out like/comment/follow)
+- Preferenze per tipo notifica (opt-out like/comment/follow/group_post)
 - Badge notifiche con animazione pulse
 
 ### Admin
@@ -63,11 +64,13 @@ Un social network privato e leggero per community raccolte. Costruito con Next.j
 ### Sicurezza
 - Password bcrypt 12 round, JWT HS256 con secret ≥32 char
 - Cookie `httpOnly`, `sameSite=lax`, `secure` in produzione
-- Rate limiting in-memory per login, register, post
+- Rate limiting in-memory per login, register, forgot-password, post
+- Reset password self-service (via email Resend)
 - Security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
 - HSTS preload attivo
 - Secret scanning (gitleaks) in CI + pre-commit hook
 - 100% query parametrizzate (zero SQL injection)
+- Open redirect protection su `?redirect=` (login)
 
 ### DevOps
 - **CI/CD**: GitHub Actions (lint, build, admin audit, secret scan, E2E tests)
@@ -109,7 +112,9 @@ npm run build        # Build produzione
 npm run lint         # ESLint
 npm run db:init      # Inizializza database
 npm run test:e2e     # Playwright E2E tests
+npm run test:restore # Smoke test backup restore
 npm run audit:admin  # Verifica guard admin routes
+npm run audit:tracked# Verifica route auth tracciate da Git
 npm run secrets:scan # Gitleaks scan
 ```
 
@@ -135,6 +140,10 @@ GET /api/health → { "ok": true, "db": true }
 ```
 
 Puoi usare [UptimeRobot](https://uptimerobot.com) (gratuito) per monitorare l'uptime.
+
+### Deploy checklist
+
+Dopo ogni deploy, esegui le verifiche in [`DEPLOY-CHECKLIST.md`](./DEPLOY-CHECKLIST.md) per assicurarti che l'alias di produzione sia correttamente promosso.
 
 ## Stack
 

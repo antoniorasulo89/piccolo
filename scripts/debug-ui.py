@@ -1,3 +1,15 @@
+"""
+Debug UI screenshot generator for local development.
+
+WARNING: This script DELETES ALL DATA and re-creates test fixtures.
+Only run against a local development database, never against production.
+
+Usage:
+  BASE_URL=http://localhost:3000 python scripts/debug-ui.py
+
+  For remote debug (CI/staging): set ALLOW_REMOTE_DEBUG_UI=1
+"""
+
 from pathlib import Path
 import os
 import re
@@ -7,6 +19,13 @@ from playwright.sync_api import sync_playwright, expect
 BASE_URL = os.environ.get("BASE_URL", "http://localhost:3000")
 OUT = Path("artifacts/debug-ui")
 OUT.mkdir(parents=True, exist_ok=True)
+
+if "localhost" not in BASE_URL and "127.0.0.1" not in BASE_URL:
+    if os.environ.get("ALLOW_REMOTE_DEBUG_UI") != "1":
+        raise SystemExit(
+            "BASE_URL is not localhost. Set ALLOW_REMOTE_DEBUG_UI=1 to run against a remote instance.\n"
+            "This script DELETES ALL DATA — never run against production."
+        )
 
 PNG_1X1 = (
     "data:image/png;base64,"
