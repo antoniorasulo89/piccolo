@@ -33,6 +33,7 @@ export async function PATCH(request: Request, context: Context) {
     [conversationId, user.id],
   );
   if (!membership) return jsonError("Non sei membro di questa conversazione.", 403);
+  if (membership.role !== "owner") return jsonError("Solo il creatore puo' rinominare la conversazione.", 403);
 
   const { data, response } = await parseJson(request, renameSchema);
   if (response) return response;
@@ -58,7 +59,7 @@ export async function DELETE(request: Request, context: Context) {
   if (conv.type !== "group_dm") return jsonError("Solo i gruppi DM possono avere rimozione membri.", 403);
 
   const { userId: rawUserId } = await request.json().catch(() => ({}));
-  const targetUserId = Number(rawUserId);
+  const targetUserId = rawUserId === undefined ? user.id : Number(rawUserId);
   if (!Number.isInteger(targetUserId)) return jsonError("Utente non valido.");
 
   const membership = await queryOne<{ role: string }>(
@@ -124,6 +125,7 @@ export async function POST(request: Request, context: Context) {
     [conversationId, user.id],
   );
   if (!membership) return jsonError("Non sei membro di questa conversazione.", 403);
+  if (membership.role !== "owner") return jsonError("Solo il creatore puo' aggiungere membri.", 403);
 
   const { userId: rawUserId } = await request.json().catch(() => ({}));
   const newUserId = Number(rawUserId);

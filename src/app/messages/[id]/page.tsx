@@ -82,6 +82,7 @@ export default async function MessagePage({ params }: MessagePageProps) {
           title={title}
           members={detail.members}
           isArchived={isArchived}
+          canManage={detail.viewerRole === "owner" || user.role === "admin"}
         />
       </section>
     </main>

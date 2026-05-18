@@ -31,6 +31,13 @@ export type ConversationMember = {
   role: "admin" | "user";
 };
 
+export type ConversationDetail = {
+  conversation: { id: number; type: "direct" | "group_dm"; title: string };
+  members: ConversationMember[];
+  messages: ChatMessage[];
+  viewerRole: string | null;
+};
+
 export async function getConversations(userId: number) {
   return queryAll<ConversationSummary>(
     `
@@ -109,6 +116,11 @@ export async function getConversationDetail(conversationId: number, userId: numb
     [conversationId],
   );
 
+  const viewerRow = await queryOne<{ role: string }>(
+    "SELECT role FROM conversation_members WHERE conversation_id = ? AND user_id = ? AND left_at IS NULL",
+    [conversationId, userId],
+  );
+
   const offset = Math.max(page, 0) * PAGE_SIZE;
   const rows = await queryAll<
     Omit<ChatMessage, "sender"> & {
@@ -152,6 +164,7 @@ export async function getConversationDetail(conversationId: number, userId: numb
         role: row.sender_role,
       },
     })),
+    viewerRole: viewerRow?.role ?? null,
   };
 }
 

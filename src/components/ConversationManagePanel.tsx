@@ -19,9 +19,10 @@ type ConversationManagePanelProps = {
   title: string;
   members: Member[];
   isArchived: boolean;
+  canManage: boolean;
 };
 
-export function ConversationManagePanel({ conversationId, type, title, members, isArchived }: ConversationManagePanelProps) {
+export function ConversationManagePanel({ conversationId, type, title, members, isArchived, canManage }: ConversationManagePanelProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [showAddMember, setShowAddMember] = useState(false);
@@ -150,7 +151,7 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
     <div className="mt-4 grid gap-4 rounded-lg border border-charcoal/10 bg-paper/72 p-4">
       <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">Gestione conversazione</p>
 
-      {editingTitle ? (
+      {canManage && editingTitle ? (
         <div className="flex gap-2">
           <input
             type="text"
@@ -174,7 +175,7 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
             Annulla
           </button>
         </div>
-      ) : (
+      ) : canManage ? (
         <button
           type="button"
           onClick={() => setEditingTitle(true)}
@@ -182,6 +183,10 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
         >
           Nome: <span className="font-semibold">{title}</span> (modifica)
         </button>
+      ) : (
+        <p className="text-sm text-charcoal/70">
+          Nome: <span className="font-semibold">{title}</span>
+        </p>
       )}
 
       <div>
@@ -196,14 +201,16 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
                 <UserAvatar user={member} size="sm" />
                 <span className="text-sm text-charcoal">{member.name}</span>
               </div>
-              <button
-                type="button"
-                disabled={pending}
-                onClick={() => removeMember(member.id)}
-                className="rounded-lg px-2 py-1 text-xs font-medium text-rose-900/70 transition hover:bg-rose-100 hover:text-rose-900 disabled:opacity-50"
-              >
-                <Trash size={14} weight="bold" />
-              </button>
+              {canManage ? (
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => removeMember(member.id)}
+                  className="rounded-lg px-2 py-1 text-xs font-medium text-rose-900/70 transition hover:bg-rose-100 hover:text-rose-900 disabled:opacity-50"
+                >
+                  <Trash size={14} weight="bold" />
+                </button>
+              ) : null}
             </div>
           ))}
         </div>
@@ -252,7 +259,7 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
             <p className="text-xs text-charcoal/42">Nessun utente trovato.</p>
           ) : null}
         </div>
-      ) : (
+      ) : canManage ? (
         <button
           type="button"
           disabled={pending}
@@ -262,7 +269,7 @@ export function ConversationManagePanel({ conversationId, type, title, members, 
           <Plus size={14} weight="bold" />
           Aggiungi membro
         </button>
-      )}
+      ) : null}
 
       <div className="flex flex-wrap gap-2 border-t border-charcoal/10 pt-3">
         <button
