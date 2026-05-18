@@ -172,7 +172,7 @@ export async function getGroupBySlug(slug: string, viewerId: number, page = 0, v
   );
 
   const requests =
-    mapped.viewer_role === "owner" || mapped.viewer_role === "moderator"
+    mapped.viewer_role === "owner" || mapped.viewer_role === "moderator" || viewerIsAdmin
       ? await queryAll<GroupRequest>(
           `
             SELECT gr.group_id, gr.user_id, u.name AS user_name, u.avatar_url AS user_avatar_url, gr.created_at
