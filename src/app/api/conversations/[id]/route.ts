@@ -33,7 +33,7 @@ export async function PATCH(request: Request, context: Context) {
     [conversationId, user.id],
   );
   if (!membership) return jsonError("Non sei membro di questa conversazione.", 403);
-  if (membership.role !== "owner") return jsonError("Solo il creatore puo' rinominare la conversazione.", 403);
+  if (membership.role !== "owner" && user.role !== "admin") return jsonError("Solo il creatore puo' rinominare la conversazione.", 403);
 
   const { data, response } = await parseJson(request, renameSchema);
   if (response) return response;
@@ -67,8 +67,8 @@ export async function DELETE(request: Request, context: Context) {
     [conversationId, user.id],
   );
   if (!membership) return jsonError("Non sei membro di questa conversazione.", 403);
-  if (membership.role !== "owner" && user.id !== targetUserId) {
-    return jsonError("Solo il creatore puo' rimuovere altri membri.", 403);
+  if (membership.role !== "owner" && user.role !== "admin" && user.id !== targetUserId) {
+    return jsonError("Solo il creatore o un admin puo' rimuovere altri membri.", 403);
   }
 
   if (user.id === targetUserId) {
@@ -125,7 +125,7 @@ export async function POST(request: Request, context: Context) {
     [conversationId, user.id],
   );
   if (!membership) return jsonError("Non sei membro di questa conversazione.", 403);
-  if (membership.role !== "owner") return jsonError("Solo il creatore puo' aggiungere membri.", 403);
+  if (membership.role !== "owner" && user.role !== "admin") return jsonError("Solo il creatore o un admin possono aggiungere membri.", 403);
 
   const { userId: rawUserId } = await request.json().catch(() => ({}));
   const newUserId = Number(rawUserId);
