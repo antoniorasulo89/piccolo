@@ -29,7 +29,8 @@ function hrefFor(
   }
 
   const qs = query.toString();
-  return qs ? `${basePath}?${qs}` : basePath;
+  const separator = basePath.includes("?") ? "&" : "?";
+  return qs ? `${basePath}${separator}${qs}` : basePath;
 }
 
 export function PaginationLinks({

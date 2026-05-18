@@ -98,7 +98,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
         </div>
       </section>
 
-      <AdminStats stats={stats} />
+      {section === "overview" ? <AdminStats stats={stats} /> : null}
 
       <nav className="mt-6 flex overflow-x-auto rounded-lg border border-charcoal/10 bg-paper/88 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
         {sections.map((s) => (

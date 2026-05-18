@@ -231,7 +231,7 @@ export async function getAuditLogs(
   }
   if (filters?.to) {
     clauses.push("a.created_at <= ?");
-    args.push(filters.to);
+    args.push(filters.to.includes(" ") ? filters.to : `${filters.to} 23:59:59`);
   }
 
   const where = clauses.length ? `WHERE ${clauses.join(" AND ")}` : "";

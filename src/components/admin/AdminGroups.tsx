@@ -22,7 +22,7 @@ export function AdminGroups({ groups, page, q, privacy, ownerId, section }: Admi
       <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Gruppi</h2>
       <p className="mt-1 text-sm text-charcoal/50">Tutti i gruppi della piattaforma, pubblici e privati.</p>
 
-      <form method="GET" action="/admin" className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto] sm:items-end">
+      <form method="GET" action="/admin" className="mt-4 grid gap-3 sm:grid-cols-[1fr_auto_auto_auto_auto] sm:items-end">
         <input type="hidden" name="section" value={section} />
         <input
           type="search"
@@ -40,6 +40,13 @@ export function AdminGroups({ groups, page, q, privacy, ownerId, section }: Admi
           <option value="public">Pubblici</option>
           <option value="private">Privati</option>
         </select>
+        <input
+          type="number"
+          name="groupsOwner"
+          defaultValue={ownerId}
+          placeholder="Owner ID"
+          className="h-9 w-28 rounded-lg border border-charcoal/10 bg-paper px-3 text-sm text-charcoal placeholder:text-charcoal/32"
+        />
         <button
           type="submit"
           className="inline-flex h-9 items-center gap-2 rounded-lg border border-charcoal/10 bg-paper/70 px-3 text-sm font-semibold text-charcoal/70 transition hover:border-clay hover:bg-clay-100 hover:text-clay-900"
