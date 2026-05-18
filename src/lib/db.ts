@@ -496,6 +496,13 @@ export async function migrate() {
     await db.execute("ALTER TABLE group_member_invites ADD COLUMN expires_at TEXT DEFAULT NULL");
   }
 
+  const notifColumns = await db.execute("PRAGMA table_info(notifications)");
+  const hasNotifGroupId = notifColumns.rows.some((column) => column.name === "group_id");
+  if (!hasNotifGroupId) {
+    await db.execute("ALTER TABLE notifications ADD COLUMN group_id INTEGER DEFAULT NULL");
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_group ON notifications(group_id)");
+  }
+
   globalDb.__socialDbMigrated = true;
 }
 

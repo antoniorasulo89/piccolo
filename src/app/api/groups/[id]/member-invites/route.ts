@@ -80,21 +80,37 @@ export async function POST(request: Request, context: Context) {
   );
   if (alreadyMember) return jsonError("L'utente e' gia' membro del gruppo.", 409);
 
-  const alreadyInvited = await queryOne(
-    "SELECT 1 FROM group_member_invites WHERE group_id = ? AND invited_user_id = ? AND status = 'pending'",
+  const pendingInvite = await queryOne<{ id: number }>(
+    "SELECT id FROM group_member_invites WHERE group_id = ? AND invited_user_id = ? AND status = 'pending'",
     [groupId, data.userId],
   );
-  if (alreadyInvited) return jsonError("L'utente ha gia' un invito in attesa.", 409);
+  if (pendingInvite) return jsonError("L'utente ha gia' un invito in attesa.", 409);
 
   const expiresAt = data.expires_in_hours
     ? new Date(Date.now() + data.expires_in_hours * 60 * 60 * 1000).toISOString().slice(0, 19).replace("T", " ")
     : null;
 
-  const result = await execute(
-    `INSERT INTO group_member_invites (group_id, invited_user_id, invited_by, status, expires_at)
-     VALUES (?, ?, ?, 'pending', ?)`,
-    [groupId, data.userId, user.id, expiresAt],
+  const existing = await queryOne<{ id: number; status: string }>(
+    "SELECT id, status FROM group_member_invites WHERE group_id = ? AND invited_user_id = ?",
+    [groupId, data.userId],
   );
+
+  let inviteId: number;
+
+  if (existing) {
+    await execute(
+      "UPDATE group_member_invites SET status = 'pending', invited_by = ?, responded_at = NULL, expires_at = ?, created_at = CURRENT_TIMESTAMP WHERE id = ?",
+      [user.id, expiresAt, existing.id],
+    );
+    inviteId = existing.id;
+  } else {
+    const result = await execute(
+      `INSERT INTO group_member_invites (group_id, invited_user_id, invited_by, status, expires_at)
+       VALUES (?, ?, ?, 'pending', ?)`,
+      [groupId, data.userId, user.id, expiresAt],
+    );
+    inviteId = Number(result.lastInsertRowid);
+  }
 
   await recordAuditLog({
     adminId: user.id,
@@ -110,5 +126,5 @@ export async function POST(request: Request, context: Context) {
     groupId,
   });
 
-  return NextResponse.json({ id: Number(result.lastInsertRowid) }, { status: 201 });
+  return NextResponse.json({ id: inviteId }, { status: 201 });
 }

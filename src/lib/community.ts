@@ -106,7 +106,7 @@ export async function getGroups(viewerId: number, filter = "all", page = 0, q = 
       ? "WHERE gm_self.status = 'active'"
       : filter === "private"
         ? "WHERE g.privacy = 'private' AND gm_self.status = 'active'"
-        : "WHERE g.privacy = 'public' OR gm_self.status = 'active'";
+        : "WHERE (g.privacy = 'public' OR gm_self.status = 'active')";
 
   const searchClause = q.trim()
     ? " AND (g.name LIKE ? OR g.description LIKE ?)"

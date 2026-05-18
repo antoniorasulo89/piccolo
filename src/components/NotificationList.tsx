@@ -1,16 +1,21 @@
 "use client";
 
 import Link from "next/link";
-import { ChatCircleText, Heart, UserPlus } from "@phosphor-icons/react";
-import { useState } from "react";
+import { Check, ChatCircleText, Heart, UserPlus, X } from "@phosphor-icons/react";
+import { useState, useTransition } from "react";
 import { NotificationActions } from "@/components/NotificationActions";
 import { ProfileBadges } from "@/components/ProfileBadges";
 import { UserAvatar } from "@/components/UserAvatar";
+import { showToast } from "./ToastProvider";
 
 type NotificationItem = {
   id: number;
   type: string;
   post_id: number | null;
+  comment_id: number | null;
+  group_id: number | null;
+  group_slug: string | null;
+  group_name: string | null;
   read_at: string | null;
   created_at: string;
   actor: {
@@ -31,11 +36,11 @@ function relativeTime(value: string) {
   return `${Math.floor(hours / 24)} g fa`;
 }
 
-function notificationCopy(type: string) {
+function notificationCopy(type: string, groupName?: string | null) {
   if (type === "like") return "ha messo like a un tuo post";
   if (type === "comment") return "ha commentato un tuo post";
-  if (type === "group_post") return "ha pubblicato nel gruppo";
-  if (type === "group_member_invite") return "ti ha invitato in un gruppo";
+  if (type === "group_post") return groupName ? `ha pubblicato in ${groupName}` : "ha pubblicato nel gruppo";
+  if (type === "group_member_invite") return groupName ? `ti ha invitato in ${groupName}` : "ti ha invitato in un gruppo";
   return "ha iniziato a seguirti";
 }
 
@@ -53,6 +58,7 @@ type NotificationListProps = {
 
 export function NotificationList({ initial }: NotificationListProps) {
   const [items, setItems] = useState(initial);
+  const [pending, startTransition] = useTransition();
 
   function handleDeleted(id: number) {
     setItems((prev) => prev.filter((item) => item.id !== id));
@@ -66,16 +72,33 @@ export function NotificationList({ initial }: NotificationListProps) {
     );
   }
 
+  function respondInvite(groupId: number, accept: boolean, notificationId: number) {
+    startTransition(async () => {
+      const res = await fetch(`/api/groups/${groupId}/respond-invite`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ accept }),
+      });
+      if (!res.ok) {
+        const data = await res.json();
+        showToast(data.error ?? "Errore.", "error");
+        return;
+      }
+      showToast(accept ? "Sei entrato nel gruppo." : "Invito rifiutato.");
+      handleDeleted(notificationId);
+    });
+  }
+
   return (
     <div className="overflow-hidden rounded-lg border border-charcoal/10 bg-surface">
       {items.length ? (
         items.map((notification) => {
-          const href =
-            notification.type === "group_member_invite" && notification.post_id
-              ? `/groups/${notification.post_id}`
-              : notification.post_id
-                ? `/post/${notification.post_id}`
-                : `/profile/${notification.actor.id}`;
+          const isInvite = notification.type === "group_member_invite";
+          const href = isInvite && notification.group_slug
+            ? `/groups/${notification.group_slug}`
+            : notification.post_id
+              ? `/post/${notification.post_id}`
+              : `/profile/${notification.actor.id}`;
 
           return (
             <div
@@ -96,7 +119,7 @@ export function NotificationList({ initial }: NotificationListProps) {
                     <span className="font-semibold text-charcoal">
                       {notification.actor.name}
                     </span>{" "}
-                    {notificationCopy(notification.type)}
+                    {notificationCopy(notification.type, notification.group_name)}
                   </p>
                   <div className="mt-2">
                     <ProfileBadges role={notification.actor.role} />
@@ -106,7 +129,29 @@ export function NotificationList({ initial }: NotificationListProps) {
                   {relativeTime(notification.created_at)}
                 </p>
               </Link>
-              <div className="flex items-start justify-end sm:col-span-3 sm:justify-end">
+              <div className="flex items-start gap-2 sm:col-span-3 sm:justify-end">
+                {isInvite && notification.group_id ? (
+                  <>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => respondInvite(notification.group_id!, true, notification.id)}
+                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-semibold text-fern-900/70 transition hover:bg-fern-100 hover:text-fern-900 disabled:opacity-50"
+                    >
+                      <Check size={14} weight="bold" />
+                      Entra
+                    </button>
+                    <button
+                      type="button"
+                      disabled={pending}
+                      onClick={() => respondInvite(notification.group_id!, false, notification.id)}
+                      className="inline-flex items-center gap-1 rounded-lg px-2 py-1 text-xs font-medium text-charcoal/50 transition hover:bg-charcoal/5 hover:text-charcoal disabled:opacity-50"
+                    >
+                      <X size={14} weight="bold" />
+                      Rifiuta
+                    </button>
+                  </>
+                ) : null}
                 <NotificationActions
                   id={notification.id}
                   isRead={Boolean(notification.read_at)}

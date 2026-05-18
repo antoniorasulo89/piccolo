@@ -8,6 +8,9 @@ export type NotificationItem = {
   type: NotificationType;
   post_id: number | null;
   comment_id: number | null;
+  group_id: number | null;
+  group_slug: string | null;
+  group_name: string | null;
   read_at: string | null;
   created_at: string;
   actor: {
@@ -31,12 +34,14 @@ export async function createNotification({
   type,
   postId,
   commentId,
+  groupId,
 }: {
   userId: number;
   actorId: number;
   type: NotificationType;
   postId?: number;
   commentId?: number;
+  groupId?: number;
 }) {
   if (userId === actorId) return;
 
@@ -55,10 +60,10 @@ export async function createNotification({
 
   await execute(
     `
-      INSERT INTO notifications (user_id, actor_id, type, post_id, comment_id)
-      VALUES (?, ?, ?, ?, ?)
+      INSERT INTO notifications (user_id, actor_id, type, post_id, comment_id, group_id)
+      VALUES (?, ?, ?, ?, ?, ?)
     `,
-    [userId, actorId, type, postId ?? null, commentId ?? null],
+    [userId, actorId, type, postId ?? null, commentId ?? null, groupId ?? null],
   );
 }
 
@@ -76,13 +81,16 @@ export async function getNotifications(userId: number, page = 0, unreadOnly = fa
   const unreadClause = unreadOnly ? "AND n.read_at IS NULL" : "";
   const rows = await queryAll<NotificationRow>(
     `
-      SELECT n.id, n.type, n.post_id, n.comment_id, n.read_at, n.created_at,
+      SELECT n.id, n.type, n.post_id, n.comment_id, n.group_id,
+        g.slug AS group_slug, g.name AS group_name,
+        n.read_at, n.created_at,
         u.id AS actor_id,
         u.name AS actor_name,
         u.avatar_url AS actor_avatar_url,
         u.role AS actor_role
       FROM notifications n
       JOIN users u ON u.id = n.actor_id
+      LEFT JOIN groups g ON g.id = n.group_id
       WHERE n.user_id = ? ${unreadClause}
       ORDER BY n.created_at DESC
       LIMIT ? OFFSET ?
@@ -95,6 +103,9 @@ export async function getNotifications(userId: number, page = 0, unreadOnly = fa
     type: row.type,
     post_id: row.post_id,
     comment_id: row.comment_id,
+    group_id: row.group_id,
+    group_slug: row.group_slug,
+    group_name: row.group_name,
     read_at: row.read_at,
     created_at: row.created_at,
     actor: {
@@ -132,8 +143,8 @@ export async function createGroupPostNotification({
 
   for (const member of members) {
     await execute(
-      "INSERT INTO notifications (user_id, actor_id, type, post_id) VALUES (?, ?, 'group_post', ?)",
-      [member.user_id, actorId, postId],
+      "INSERT INTO notifications (user_id, actor_id, type, post_id, group_id) VALUES (?, ?, 'group_post', ?, ?)",
+      [member.user_id, actorId, postId, groupId],
     );
   }
 }
@@ -150,7 +161,7 @@ export async function createGroupMemberInviteNotification({
   if (userId === actorId) return;
 
   await execute(
-    "INSERT INTO notifications (user_id, actor_id, type, post_id) VALUES (?, ?, 'group_member_invite', ?)",
+    "INSERT INTO notifications (user_id, actor_id, type, group_id) VALUES (?, ?, 'group_member_invite', ?)",
     [userId, actorId, groupId],
   );
 }
