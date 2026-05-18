@@ -7,6 +7,7 @@ function getResend() {
 }
 
 const FROM = process.env.RESEND_FROM || "Piccolo <noreply@piccolo.social>";
+const APP_URL = process.env.APP_URL || process.env.NEXT_PUBLIC_APP_URL || "https://piccolo-hazel.vercel.app";
 
 export async function sendPasswordResetEmail(email: string, resetUrl: string) {
   const resend = getResend();
@@ -48,7 +49,7 @@ Con Piccolo puoi:
 - Gestire ruoli, moderazione e accessi
 - Usare messaggi diretti e notifiche
 
-Inizia ora: https://my-social-hazel.vercel.app/feed
+Inizia ora: ${APP_URL}/feed
 
 — Piccolo`,
   });

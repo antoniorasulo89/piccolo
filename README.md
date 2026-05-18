@@ -175,6 +175,7 @@ Email:
 ```bash
 RESEND_API_KEY=
 RESEND_FROM=
+APP_URL=
 ```
 
 Test:
@@ -208,6 +209,7 @@ npm run secrets:scan  # Gitleaks scan
    - `TURSO_AUTH_TOKEN`
    - `RESEND_API_KEY` opzionale ma richiesto per email reali
    - `RESEND_FROM` opzionale
+   - `APP_URL` opzionale, usato nei link email
 3. Connetti il repo GitHub a Vercel.
 4. Verifica che la production branch sia `master`.
 5. Verifica che Vercel auto-assegni il dominio production al deploy fresco.
@@ -224,8 +226,8 @@ GET /api/health -> { "ok": true, "db": true }
 Dopo ogni deploy:
 
 ```bash
-curl -i https://my-social-hazel.vercel.app/api/auth/me
-curl -i https://my-social-hazel.vercel.app/api/health
+curl -i https://piccolo-hazel.vercel.app/api/auth/me
+curl -i https://piccolo-hazel.vercel.app/api/health
 ```
 
 Atteso:

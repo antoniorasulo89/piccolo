@@ -1,14 +1,11 @@
 import type { NextConfig } from "next";
 
+import { ALLOWED_IMAGE_HOSTS } from "./src/lib/image-hosts";
+
 const nextConfig: NextConfig = {
   poweredByHeader: false,
   images: {
-    remotePatterns: [
-      { protocol: "https", hostname: "images.unsplash.com" },
-      { protocol: "https", hostname: "avatars.githubusercontent.com" },
-      { protocol: "https", hostname: "lh3.googleusercontent.com" },
-      { protocol: "https", hostname: "res.cloudinary.com" },
-    ],
+    remotePatterns: ALLOWED_IMAGE_HOSTS.map((hostname) => ({ protocol: "https", hostname })),
   },
   turbopack: {
     root: __dirname,

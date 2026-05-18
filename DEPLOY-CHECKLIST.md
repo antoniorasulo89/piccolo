@@ -2,23 +2,23 @@
 
 ## Configurazione Vercel (una tantum)
 
-Verifica in [Vercel Dashboard → my-social → Settings → Git](https://vercel.com/antonior89-s-projects/my-social/settings/git):
+Verifica in [Vercel Dashboard → piccolo → Settings → Git](https://vercel.com/antonior89-s-projects/piccolo/settings/git):
 
 - **Production Branch**: deve essere `master`
 - **Auto-assign custom production domains**: deve essere **attivo** (spuntato)
 
-Senza questa opzione, ogni `git push` crea un deployment Ready ma **non promuove** l'alias `my-social-hazel.vercel.app`. Prod rimane sul deployment precedente.
+Senza questa opzione, ogni `git push` crea un deployment Ready ma **non promuove** l'alias `piccolo-hazel.vercel.app`. Prod rimane sul deployment precedente.
 
 ## Dopo ogni deploy
 
 ```bash
-curl -sI https://my-social-hazel.vercel.app/api/auth/me
+curl -sI https://piccolo-hazel.vercel.app/api/auth/me
 ```
 
 **Atteso:** `401` + `X-Matched-Path: /api/auth/me`
 
 ```bash
-curl -s https://my-social-hazel.vercel.app/api/health
+curl -s https://piccolo-hazel.vercel.app/api/health
 ```
 
 **Atteso:** `{"ok":true,"db":true}`
@@ -27,7 +27,7 @@ curl -s https://my-social-hazel.vercel.app/api/health
 
 Se uno dei due mostra `X-Matched-Path: /_not-found` o `Content-Type: text/html` o `404`:
 
-1. Vai su [Deployments](https://vercel.com/antonior89-s-projects/my-social/deployments)
+1. Vai su [Deployments](https://vercel.com/antonior89-s-projects/piccolo/deployments)
 2. Trova l'ultimo deployment `Ready` (non `Error`)
 3. Clicca `...` → `Promote to Production`
 4. Riesegui i curl sopra
@@ -37,5 +37,5 @@ In alternativa, da CLI: `npx vercel deploy --prod --yes` forza promozione immedi
 ## Note
 
 - Dopo `--force` deploy, l'alias può richiedere fino a 60s per propagarsi.
-- Il raw deployment URL (es. `my-social-abc123.vercel.app`) ha Vercel Deployment Protection attivo.
-- Verificare **sempre** sull'alias `my-social-hazel.vercel.app`, mai sul raw URL.
+- Il raw deployment URL (es. `piccolo-abc123.vercel.app`) ha Vercel Deployment Protection attivo.
+- Verificare **sempre** sull'alias `piccolo-hazel.vercel.app`, mai sul raw URL.

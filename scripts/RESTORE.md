@@ -51,7 +51,7 @@ npx tsx scripts/backup-db.ts | Out-File -FilePath "piccolo-backup-$(Get-Date -Fo
 4. Verifica con healthcheck:
 
 ```bash
-curl https://my-social-hazel.vercel.app/api/health
+curl https://piccolo-hazel.vercel.app/api/health
 # → {"ok":true,"db":true}
 ```
 

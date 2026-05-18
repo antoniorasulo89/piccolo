@@ -1,5 +1,7 @@
 import { z } from "zod";
 
+import { isAllowedImageHost } from "./image-hosts";
+
 export const emailSchema = z.string().trim().toLowerCase().email().max(254);
 export const passwordSchema = z.string().min(8).max(128);
 export const shortTextSchema = z.string().trim().min(1);
@@ -69,10 +71,7 @@ const httpsUrlSchema = z
     if (!value) return true;
     try {
       const url = new URL(value);
-      return (
-        url.protocol === "https:" &&
-        ["images.unsplash.com", "avatars.githubusercontent.com", "lh3.googleusercontent.com", "res.cloudinary.com"].includes(url.hostname)
-      );
+      return url.protocol === "https:" && isAllowedImageHost(url.hostname);
     } catch {
       return false;
     }
