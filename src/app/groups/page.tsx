@@ -9,7 +9,7 @@ import { getGroups } from "@/lib/community";
 import { hasNextPage, pageItems, parsePage } from "@/lib/pagination";
 
 type GroupsPageProps = {
-  searchParams: Promise<{ filter?: string; page?: string }>;
+  searchParams: Promise<{ filter?: string; page?: string; q?: string }>;
 };
 
 const filters = [
@@ -24,8 +24,9 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
 
   const params = await searchParams;
   const filter = params.filter === "mine" || params.filter === "private" ? params.filter : "all";
+  const q = params.q?.trim() ?? "";
   const page = parsePage(params.page);
-  const groups = await getGroups(user.id, filter, page);
+  const groups = await getGroups(user.id, filter, page, q);
   const visibleGroups = pageItems(groups);
 
   return (
@@ -43,7 +44,18 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           </p>
         </div>
 
-        <nav className="mt-6 flex flex-wrap gap-2">
+        <form method="GET" action="/groups" className="mt-5">
+          <input type="hidden" name="filter" value={filter !== "all" ? filter : ""} />
+          <input
+            type="search"
+            name="q"
+            defaultValue={q}
+            placeholder="Cerca gruppi per nome o descrizione"
+            className="h-10 w-full max-w-sm rounded-lg border border-charcoal/10 bg-paper px-4 text-sm text-charcoal placeholder:text-charcoal/32 transition focus:border-clay focus:ring-2 focus:ring-clay/25 focus:outline-none"
+          />
+        </form>
+
+        <nav className="mt-4 flex flex-wrap gap-2">
           {filters.map((item) => {
             const href = item.key === "all" ? "/groups" : `/groups?filter=${item.key}`;
             const active = filter === item.key;
@@ -116,10 +128,12 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           ) : (
             <div className="rounded-lg border border-charcoal/10 bg-surface p-8 md:col-span-2">
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">
-                Crea il primo gruppo per la tua community.
+                {q ? "Nessun gruppo trovato." : "Crea il primo gruppo per la tua community."}
               </h2>
               <p className="mt-2 max-w-[52ch] leading-7 text-charcoal/58">
-                Uno spazio riservato per team, corsi o associazioni. Scegli tu se pubblico o privato.
+                {q
+                  ? `Nessun gruppo corrisponde a "${q}". Prova con altri termini di ricerca.`
+                  : "Uno spazio riservato per team, corsi o associazioni. Scegli tu se pubblico o privato."}
               </p>
             </div>
           )}

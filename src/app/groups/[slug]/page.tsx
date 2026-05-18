@@ -2,11 +2,13 @@ import Link from "next/link";
 import { LockKey, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import { notFound, redirect } from "next/navigation";
 import { GroupInviteButton } from "@/components/GroupInviteButton";
+import { GroupInvitesTab } from "@/components/GroupInvitesTab";
 import { GroupJoinButton } from "@/components/GroupJoinButton";
 import { GroupMembers } from "@/components/GroupMembers";
 import { GroupPostComposer } from "@/components/GroupPostComposer";
 import { GroupRequestButton } from "@/components/GroupRequestButton";
 import { GroupSettings } from "@/components/GroupSettings";
+import { MemberInvitesPanel } from "@/components/MemberInvitesPanel";
 import { PaginationLinks } from "@/components/PaginationLinks";
 import { PinPostButton } from "@/components/PinPostButton";
 import { PostCard } from "@/components/PostCard";
@@ -187,7 +189,10 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
                   <h2 className="text-xl font-semibold tracking-tight text-charcoal">Inviti</h2>
                   <p className="mt-1 text-sm text-charcoal/55">Crea e gestisci i link di invito al gruppo.</p>
                 </div>
-                <GroupInviteButton groupId={group.id} />
+              </div>
+              <GroupInvitesTab groupId={group.id} />
+              <div className="mt-6">
+                <MemberInvitesPanel groupId={group.id} />
               </div>
             </div>
           ) : null}

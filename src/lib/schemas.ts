@@ -100,6 +100,20 @@ export const groupRequestResolutionSchema = z.object({
   status: z.enum(["approved", "rejected"]).optional().default("approved"),
 });
 
+export const createInviteSchema = z.object({
+  max_uses: z.number().int().min(1).max(1000).optional(),
+  expires_in_hours: z.number().int().min(1).max(720).optional(),
+});
+
+export const createMemberInviteSchema = z.object({
+  userId: z.number().int().positive(),
+  expires_in_hours: z.number().int().min(1).max(720).optional(),
+});
+
+export const memberInviteResponseSchema = z.object({
+  status: z.enum(["accepted", "declined"]),
+});
+
 export const adminRoleSchema = z.object({
   role: z.enum(["admin", "user"]),
 });

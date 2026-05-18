@@ -335,6 +335,23 @@ export async function migrate() {
       "CREATE INDEX IF NOT EXISTS idx_messages_conversation_created ON messages(conversation_id, created_at DESC)",
       "CREATE INDEX IF NOT EXISTS idx_password_reset_tokens_hash ON password_reset_tokens(token_hash)",
       `
+      CREATE TABLE IF NOT EXISTS group_member_invites (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        group_id INTEGER NOT NULL,
+        invited_user_id INTEGER NOT NULL,
+        invited_by INTEGER NOT NULL,
+        status TEXT NOT NULL DEFAULT 'pending',
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        responded_at TEXT DEFAULT NULL,
+        expires_at TEXT DEFAULT NULL,
+        UNIQUE(group_id, invited_user_id),
+        FOREIGN KEY (group_id) REFERENCES groups(id) ON DELETE CASCADE,
+        FOREIGN KEY (invited_user_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (invited_by) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `,
+      "CREATE INDEX IF NOT EXISTS idx_group_member_invites_user ON group_member_invites(invited_user_id, group_id)",
+      `
       INSERT INTO _meta (key, value)
       VALUES ('schema_version', '${SCHEMA_VERSION}')
       ON CONFLICT(key) DO UPDATE SET
@@ -460,6 +477,23 @@ export async function migrate() {
     if (!hasInviteCreatedBy) {
       await db.execute("ALTER TABLE group_invites ADD COLUMN created_by INTEGER DEFAULT NULL");
     }
+    const hasInviteRevokedAt = inviteColumns.rows.some((column) => column.name === "revoked_at");
+    if (!hasInviteRevokedAt) {
+      await db.execute("ALTER TABLE group_invites ADD COLUMN revoked_at TEXT DEFAULT NULL");
+    }
+    const hasInviteRevokedBy = inviteColumns.rows.some((column) => column.name === "revoked_by");
+    if (!hasInviteRevokedBy) {
+      await db.execute("ALTER TABLE group_invites ADD COLUMN revoked_by INTEGER DEFAULT NULL");
+    }
+  }
+
+  const miColumns = await db.execute("PRAGMA table_info(group_member_invites)");
+  const hasGroupMemberInvites = miColumns.rows.length > 0;
+  const hasMiStatus = hasGroupMemberInvites && miColumns.rows.some((column) => column.name === "status");
+  if (hasGroupMemberInvites && !hasMiStatus) {
+    await db.execute("ALTER TABLE group_member_invites ADD COLUMN status TEXT NOT NULL DEFAULT 'pending'");
+    await db.execute("ALTER TABLE group_member_invites ADD COLUMN responded_at TEXT DEFAULT NULL");
+    await db.execute("ALTER TABLE group_member_invites ADD COLUMN expires_at TEXT DEFAULT NULL");
   }
 
   globalDb.__socialDbMigrated = true;

@@ -99,7 +99,7 @@ export async function uniqueGroupSlug(name: string) {
   return slug;
 }
 
-export async function getGroups(viewerId: number, filter = "all", page = 0) {
+export async function getGroups(viewerId: number, filter = "all", page = 0, q = "") {
   const offset = Math.max(page, 0) * PAGE_SIZE;
   const where =
     filter === "mine"
@@ -107,6 +107,10 @@ export async function getGroups(viewerId: number, filter = "all", page = 0) {
       : filter === "private"
         ? "WHERE g.privacy = 'private' AND gm_self.status = 'active'"
         : "WHERE g.privacy = 'public' OR gm_self.status = 'active'";
+
+  const searchClause = q.trim()
+    ? " AND (g.name LIKE ? OR g.description LIKE ?)"
+    : "";
 
   const rows = await queryAll<GroupRow>(
     `
@@ -119,11 +123,13 @@ export async function getGroups(viewerId: number, filter = "all", page = 0) {
       FROM groups g
       JOIN users owner ON owner.id = g.owner_id
       LEFT JOIN group_members gm_self ON gm_self.group_id = g.id AND gm_self.user_id = ?
-      ${where}
+      ${where}${searchClause}
       ORDER BY gm_self.status DESC, g.created_at DESC
       LIMIT ? OFFSET ?
     `,
-    [viewerId, PAGE_LIMIT, offset],
+    q.trim()
+      ? [viewerId, `%${q.trim()}%`, `%${q.trim()}%`, PAGE_LIMIT, offset]
+      : [viewerId, PAGE_LIMIT, offset],
   );
 
   return rows.map(mapGroup);

@@ -1,7 +1,7 @@
 import { execute, queryAll, queryOne } from "./db";
 import { PAGE_LIMIT, PAGE_SIZE } from "./pagination";
 
-export type NotificationType = "like" | "comment" | "follow" | "group_post";
+export type NotificationType = "like" | "comment" | "follow" | "group_post" | "group_member_invite";
 
 export type NotificationItem = {
   id: number;
@@ -136,4 +136,21 @@ export async function createGroupPostNotification({
       [member.user_id, actorId, postId],
     );
   }
+}
+
+export async function createGroupMemberInviteNotification({
+  userId,
+  actorId,
+  groupId,
+}: {
+  userId: number;
+  actorId: number;
+  groupId: number;
+}) {
+  if (userId === actorId) return;
+
+  await execute(
+    "INSERT INTO notifications (user_id, actor_id, type, post_id) VALUES (?, ?, 'group_member_invite', ?)",
+    [userId, actorId, groupId],
+  );
 }

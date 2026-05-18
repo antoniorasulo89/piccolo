@@ -35,6 +35,7 @@ function notificationCopy(type: string) {
   if (type === "like") return "ha messo like a un tuo post";
   if (type === "comment") return "ha commentato un tuo post";
   if (type === "group_post") return "ha pubblicato nel gruppo";
+  if (type === "group_member_invite") return "ti ha invitato in un gruppo";
   return "ha iniziato a seguirti";
 }
 
@@ -42,6 +43,7 @@ function NotificationIcon({ type }: { type: string }) {
   if (type === "like") return <Heart size={18} weight="fill" className="text-rose-900" />;
   if (type === "comment") return <ChatCircleText size={18} weight="bold" className="text-fern-900" />;
   if (type === "group_post") return <ChatCircleText size={18} weight="bold" className="text-clay-900" />;
+  if (type === "group_member_invite") return <UserPlus size={18} weight="bold" className="text-clay-900" />;
   return <UserPlus size={18} weight="bold" className="text-fern-900" />;
 }
 
@@ -68,9 +70,12 @@ export function NotificationList({ initial }: NotificationListProps) {
     <div className="overflow-hidden rounded-lg border border-charcoal/10 bg-surface">
       {items.length ? (
         items.map((notification) => {
-          const href = notification.post_id
-            ? `/post/${notification.post_id}`
-            : `/profile/${notification.actor.id}`;
+          const href =
+            notification.type === "group_member_invite" && notification.post_id
+              ? `/groups/${notification.post_id}`
+              : notification.post_id
+                ? `/post/${notification.post_id}`
+                : `/profile/${notification.actor.id}`;
 
           return (
             <div
