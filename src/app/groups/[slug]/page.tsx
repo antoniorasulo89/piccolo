@@ -43,11 +43,11 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
   const visiblePosts = pageItems(posts);
   const canPost = group.is_member;
   const isOwner = group.viewer_role === "owner";
+  const isCoOwner = group.viewer_role === "co_owner";
   const isModerator = group.viewer_role === "moderator";
-  const canModerate = isOwner || isModerator || user.role === "admin";
+  const canModerate = isOwner || isCoOwner || isModerator || user.role === "admin";
   const locked = group.privacy === "private" && !group.is_member && user.role !== "admin";
-  const canExpel = isOwner || isModerator || user.role === "admin";
-  const canChangeRoles = isOwner || user.role === "admin";
+  const canGovern = isOwner || isCoOwner || user.role === "admin";
 
   const members = activeTab === "members" || activeTab === "invites"
     ? await getGroupMembers(group.id)
@@ -81,7 +81,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
               <p className="mt-3 font-mono text-xs text-charcoal/42">
                 {group.members_count} membri / {group.posts_count} post / owner {group.owner_name}
               </p>
-              {canModerate && activeTab === "posts" ? (
+              {canGovern && activeTab === "posts" ? (
                 <div className="mt-3">
                   <GroupInviteButton groupId={group.id} />
                 </div>
@@ -108,7 +108,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
       <nav className="mt-6 grid grid-cols-4 rounded-lg border border-charcoal/10 bg-paper/88 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
         {tabs.map((tab) => {
           const isSettingsTab = tab.key === "settings";
-          const visible = !isSettingsTab || canModerate;
+          const visible = !isSettingsTab || canGovern;
           if (!visible) return null;
           return (
             <Link
@@ -175,7 +175,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">Membri ({members.length})</h2>
               <div className="mt-4">
-                <GroupMembers members={members} groupId={group.id} canExpel={canExpel} canChangeRoles={canChangeRoles} />
+                <GroupMembers members={members} groupId={group.id} actorRole={group.viewer_role} isAdmin={user.role === "admin"} />
               </div>
             </div>
           ) : null}
@@ -192,7 +192,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             </div>
           ) : null}
 
-          {activeTab === "settings" && canModerate ? (
+          {activeTab === "settings" && canGovern ? (
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">Impostazioni</h2>
               <div className="mt-4">
@@ -208,12 +208,12 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
                 <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">Stato</p>
                 <p className="mt-2 text-sm leading-6 text-charcoal/62">
                   {group.is_member
-                    ? `Sei ${isOwner ? "owner" : isModerator ? "moderator" : "membro"} del gruppo.`
+                    ? `Sei ${isOwner ? "owner" : isCoOwner ? "co-owner" : isModerator ? "moderator" : "membro"} del gruppo.`
                     : user.role === "admin" ? "Accesso come amministratore — non sei membro." : "Puoi leggere i gruppi pubblici, ma devi entrare per pubblicare."}
                 </p>
               </div>
 
-              {canModerate && requests.length > 0 ? (
+              {canGovern && requests.length > 0 ? (
                 <div className="mt-4 rounded-lg border border-charcoal/10 bg-surface p-5">
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">Richieste in attesa</p>
                   <div className="mt-3 grid gap-3">
@@ -239,9 +239,11 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
                 <div className="mt-4 rounded-lg border border-charcoal/10 bg-paper/64 p-5">
                   <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">Come funziona</p>
                   <p className="mt-2 text-sm leading-6 text-charcoal/58">
-                    {canModerate
+                    {canGovern
                       ? "Puoi creare link di invito, gestire le richieste di accesso, fissare post e moderare i membri."
-                      : "Scrivi post, commenta e interagisci con gli altri membri del gruppo."}
+                      : canModerate
+                        ? "Puoi fissare post e moderare i contenuti del gruppo."
+                        : "Scrivi post, commenta e interagisci con gli altri membri del gruppo."}
                   </p>
                 </div>
               ) : null}

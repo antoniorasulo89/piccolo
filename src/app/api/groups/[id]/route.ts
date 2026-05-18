@@ -23,8 +23,8 @@ export async function PATCH(request: Request, context: Context) {
   if (!Number.isInteger(groupId)) return jsonError("Gruppo non valido.");
 
   const membership = await getGroupMembership(groupId, user.id);
-  const canManage = membership?.role === "owner" || user.role === "admin";
-  if (!canManage) return jsonError("Solo owner e admin possono modificare il gruppo.", 403);
+  const canManage = membership?.role === "owner" || membership?.role === "co_owner" || user.role === "admin";
+  if (!canManage) return jsonError("Solo owner, co-owner e admin possono modificare il gruppo.", 403);
 
   const { data, response } = await parseJson(request, updateGroupSchema);
   if (response) return response;

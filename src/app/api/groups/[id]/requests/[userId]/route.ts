@@ -22,7 +22,7 @@ export async function PATCH(request: Request, context: Context) {
   }
 
   const membership = await getGroupMembership(groupId, currentUser.id);
-  const canManageRequests = membership?.role === "owner" || membership?.role === "moderator" || currentUser.role === "admin";
+  const canManageRequests = membership?.role === "owner" || membership?.role === "co_owner" || currentUser.role === "admin";
   if (!canManageRequests) return jsonError("Permessi insufficienti.", 403);
 
   const requestRow = await queryOne(

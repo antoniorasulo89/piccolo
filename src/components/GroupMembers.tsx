@@ -1,6 +1,6 @@
 "use client";
 
-import { ShieldCheck, Trash } from "@phosphor-icons/react";
+import { ShieldCheck, ShieldPlus, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
@@ -11,18 +11,49 @@ type Member = {
   user_id: number;
   name: string;
   avatar_url: string | null;
-  role: "owner" | "moderator" | "member";
+  role: "owner" | "co_owner" | "moderator" | "member";
   joined_at: string;
 };
 
 type GroupMembersProps = {
   members: Member[];
   groupId: number;
-  canExpel: boolean;
-  canChangeRoles: boolean;
+  actorRole: string | null;
+  isAdmin: boolean;
 };
 
-export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: GroupMembersProps) {
+function canExpelMember(actorRole: string | null, targetRole: string, isAdmin: boolean) {
+  if (isAdmin) return targetRole !== "owner";
+  if (actorRole === "owner") return targetRole !== "owner";
+  if (actorRole === "co_owner") return targetRole !== "owner" && targetRole !== "co_owner";
+  if (actorRole === "moderator") return targetRole === "member";
+  return false;
+}
+
+function canChangeRole(actorRole: string | null, targetRole: string, newRole: string, isAdmin: boolean) {
+  if (isAdmin) return targetRole !== "owner" && newRole !== "owner";
+  if (actorRole === "owner") return targetRole !== "owner" && newRole !== "owner";
+  if (actorRole === "co_owner") {
+    return targetRole !== "owner" && targetRole !== "co_owner" && newRole !== "co_owner" && newRole !== "owner";
+  }
+  return false;
+}
+
+function roleBadge(role: string) {
+  if (role === "owner") return "text-clay-900 bg-clay-100";
+  if (role === "co_owner") return "text-amber-900 bg-amber-100";
+  if (role === "moderator") return "text-fern-900 bg-fern-100";
+  return "text-charcoal/50";
+}
+
+function roleLabel(role: string) {
+  if (role === "owner") return "Owner";
+  if (role === "co_owner") return "Co-owner";
+  if (role === "moderator") return "Moderator";
+  return "Membro";
+}
+
+export function GroupMembers({ members, groupId, actorRole, isAdmin }: GroupMembersProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [confirmExpel, setConfirmExpel] = useState<number | null>(null);
@@ -41,7 +72,7 @@ export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: Gro
     });
   }
 
-  function changeRole(userId: number, role: "moderator" | "member") {
+  function changeRole(userId: number, role: string) {
     startTransition(async () => {
       const res = await fetch(`/api/groups/${groupId}/members/${userId}`, {
         method: "PATCH",
@@ -58,14 +89,28 @@ export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: Gro
     });
   }
 
+  const showActionsFor = (member: Member) => {
+    if (member.role === "owner") return [];
+    const actions: { label: string; role: string; icon?: typeof ShieldCheck; className?: string }[] = [];
+
+    if (canChangeRole(actorRole, member.role, "co_owner", isAdmin)) {
+      actions.push({ label: "Co-owner", role: "co_owner", icon: ShieldPlus, className: "text-amber-900/70 hover:bg-amber-100 hover:text-amber-900" });
+    }
+    if (canChangeRole(actorRole, member.role, "moderator", isAdmin)) {
+      actions.push({ label: "Moderator", role: "moderator", icon: ShieldCheck, className: "text-fern-900/70 hover:bg-fern-100 hover:text-fern-900" });
+    }
+    if (canChangeRole(actorRole, member.role, "member", isAdmin) && member.role !== "member") {
+      actions.push({ label: "Declassa", role: "member", className: "text-charcoal/50 hover:bg-charcoal/5 hover:text-charcoal" });
+    }
+
+    return actions;
+  };
+
   return (
     <div className="grid gap-2">
       {members.map((member) => {
-        const isOwner = member.role === "owner";
-        const isModerator = member.role === "moderator";
-        const showExpel = canExpel && !isOwner && confirmExpel !== member.user_id;
-        const showPromote = canChangeRoles && !isOwner && !isModerator;
-        const showDemote = canChangeRoles && !isOwner && isModerator;
+        const showExpel = canExpelMember(actorRole, member.role, isAdmin);
+        const roleActions = showActionsFor(member);
         const confirming = confirmExpel === member.user_id;
 
         return (
@@ -79,11 +124,9 @@ export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: Gro
                 <Link href={`/profile/${member.user_id}`} className="font-semibold text-charcoal hover:underline">
                   {member.name}
                 </Link>
-                <div className="flex items-center gap-2">
-                  <span className={`text-xs font-medium ${isOwner ? "text-clay-900" : isModerator ? "text-fern-900" : "text-charcoal/50"}`}>
-                    {isOwner ? "Owner" : isModerator ? "Moderator" : "Membro"}
-                  </span>
-                </div>
+                <span className={`ml-2 inline-block rounded-md px-2 py-0.5 text-[0.65rem] font-semibold ${roleBadge(member.role)}`}>
+                  {roleLabel(member.role)}
+                </span>
               </div>
             </div>
 
@@ -109,27 +152,18 @@ export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: Gro
               </div>
             ) : (
               <div className="flex gap-2">
-                {showDemote ? (
+                {roleActions.map((action) => (
                   <button
+                    key={action.role}
                     type="button"
                     disabled={pending}
-                    onClick={() => changeRole(member.user_id, "member")}
-                    className="rounded-lg px-2 py-1 text-xs font-medium text-charcoal/50 transition hover:bg-charcoal/5 hover:text-charcoal disabled:opacity-50"
+                    onClick={() => changeRole(member.user_id, action.role)}
+                    className={`rounded-lg px-2 py-1 text-xs font-medium transition disabled:opacity-50 ${action.className ?? ""}`}
                   >
-                    Declassa
+                    {action.icon ? <action.icon size={14} weight="bold" className="inline mr-1" /> : null}
+                    {action.label}
                   </button>
-                ) : null}
-                {showPromote ? (
-                  <button
-                    type="button"
-                    disabled={pending}
-                    onClick={() => changeRole(member.user_id, "moderator")}
-                    className="rounded-lg px-2 py-1 text-xs font-medium text-fern-900/70 transition hover:bg-fern-100 hover:text-fern-900 disabled:opacity-50"
-                  >
-                    <ShieldCheck size={14} weight="bold" className="inline mr-1" />
-                    Promuovi
-                  </button>
-                ) : null}
+                ))}
                 {showExpel ? (
                   <button
                     type="button"

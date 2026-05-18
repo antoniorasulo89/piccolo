@@ -37,8 +37,8 @@ export async function POST(request: Request, context: Context) {
     [groupId, user.id],
   );
   if (!membership && user.role !== "admin") return jsonError("Non sei membro del gruppo.", 403);
-  if (membership && membership.role !== "owner" && membership.role !== "moderator" && user.role !== "admin") {
-    return jsonError("Solo owner e moderator possono creare inviti.", 403);
+  if (membership && membership.role !== "owner" && membership.role !== "co_owner" && user.role !== "admin") {
+    return jsonError("Solo owner e co-owner possono creare inviti.", 403);
   }
 
   const { data, response } = await parseJson(request, createInviteSchema);
@@ -82,8 +82,8 @@ export async function DELETE(request: Request, context: Context) {
     [groupId, user.id],
   );
   if (!membership && user.role !== "admin") return jsonError("Non sei membro del gruppo.", 403);
-  if (membership && membership.role !== "owner" && membership.role !== "moderator" && user.role !== "admin") {
-    return jsonError("Solo owner e moderator possono revocare inviti.", 403);
+  if (membership && membership.role !== "owner" && membership.role !== "co_owner" && user.role !== "admin") {
+    return jsonError("Solo owner e co-owner possono revocare inviti.", 403);
   }
 
   const { token } = await request.json().catch(() => ({}));

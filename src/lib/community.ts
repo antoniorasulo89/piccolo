@@ -13,7 +13,7 @@ type GroupRow = {
   owner_name: string;
   members_count: number;
   posts_count: number;
-  viewer_role: "owner" | "moderator" | "member" | null;
+  viewer_role: "owner" | "co_owner" | "moderator" | "member" | null;
   viewer_status: "active" | "pending" | null;
 };
 
@@ -215,7 +215,7 @@ export async function createGroup({
 }
 
 export async function getGroupMembership(groupId: number, userId: number) {
-  return queryOne<{ role: "owner" | "moderator" | "member"; status: "active" | "pending" }>(
+  return queryOne<{ role: "owner" | "co_owner" | "moderator" | "member"; status: "active" | "pending" }>(
     "SELECT role, status FROM group_members WHERE group_id = ? AND user_id = ?",
     [groupId, userId],
   );
@@ -258,14 +258,14 @@ export async function getGroupMembers(groupId: number) {
     user_id: number;
     name: string;
     avatar_url: string | null;
-    role: "owner" | "moderator" | "member";
+    role: "owner" | "co_owner" | "moderator" | "member";
     joined_at: string;
   }>(
     `SELECT u.id AS user_id, u.name, u.avatar_url, gm.role, gm.created_at AS joined_at
      FROM group_members gm
      JOIN users u ON u.id = gm.user_id
      WHERE gm.group_id = ? AND gm.status = 'active'
-     ORDER BY CASE gm.role WHEN 'owner' THEN 1 WHEN 'moderator' THEN 2 ELSE 3 END, gm.created_at ASC`,
+     ORDER BY CASE gm.role WHEN 'owner' THEN 1 WHEN 'co_owner' THEN 2 WHEN 'moderator' THEN 3 ELSE 4 END, gm.created_at ASC`,
     [groupId],
   );
 }
