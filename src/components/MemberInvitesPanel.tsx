@@ -53,7 +53,7 @@ export function MemberInvitesPanel({ groupId }: { groupId: number }) {
     const res = await fetch(`/api/groups/${groupId}/member-invites`);
     if (res.ok) {
       const data = await res.json();
-      setInvites(data.invites.filter((i: MemberInviteItem) => i.status === "pending" || i.status === "accepted" || i.status === "declined" || i.status === "revoked"));
+      setInvites(data.invites);
     }
     setLoaded(true);
   }

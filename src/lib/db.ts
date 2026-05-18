@@ -501,8 +501,8 @@ export async function migrate() {
   const hasNotifGroupId = notifColumns.rows.some((column) => column.name === "group_id");
   if (!hasNotifGroupId) {
     await db.execute("ALTER TABLE notifications ADD COLUMN group_id INTEGER DEFAULT NULL");
-    await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_group ON notifications(group_id)");
   }
+  await db.execute("CREATE INDEX IF NOT EXISTS idx_notifications_group ON notifications(group_id)");
 
   globalDb.__socialDbMigrated = true;
 }

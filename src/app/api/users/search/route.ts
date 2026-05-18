@@ -42,7 +42,7 @@ export async function GET(request: Request) {
   const users = await queryAll<{ id: number; name: string; avatar_url: string | null }>(
     `SELECT u.id, u.name, u.avatar_url
      FROM users u
-     WHERE u.id != ? AND u.name LIKE ?
+     WHERE u.id != ? AND u.name LIKE ? AND u.privacy_discoverable = 1
      ORDER BY u.name ASC
      LIMIT 20`,
     [user.id, `%${q}%`],
