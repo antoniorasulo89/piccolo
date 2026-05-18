@@ -57,5 +57,10 @@ export async function POST(request: Request, context: Context) {
     );
   }
 
+  await execute(
+    "DELETE FROM notifications WHERE user_id = ? AND type = 'group_member_invite' AND group_id = ?",
+    [user.id, groupId],
+  );
+
   return NextResponse.json({ ok: true, groupId });
 }

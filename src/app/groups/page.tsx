@@ -143,7 +143,7 @@ export default async function GroupsPage({ searchParams }: GroupsPageProps) {
           page={page}
           hasNext={hasNextPage(groups)}
           basePath="/groups"
-          params={{ filter: filter === "all" ? undefined : filter }}
+          params={{ filter: filter === "all" ? undefined : filter, q: q || undefined }}
         />
       </section>
 

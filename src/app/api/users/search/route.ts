@@ -30,6 +30,7 @@ export async function GET(request: Request) {
        FROM users u
        WHERE u.id != ?
          AND u.name LIKE ?
+         AND u.privacy_discoverable = 1
          AND u.id NOT IN (SELECT user_id FROM group_members WHERE group_id = ? AND status = 'active')
        ORDER BY u.name ASC
        LIMIT 20`,

@@ -129,6 +129,7 @@ export async function migrate() {
         type TEXT NOT NULL,
         post_id INTEGER DEFAULT NULL,
         comment_id INTEGER DEFAULT NULL,
+        group_id INTEGER DEFAULT NULL,
         read_at TEXT DEFAULT NULL,
         created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
         FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,

@@ -19,7 +19,7 @@ type MemberInviteItem = {
   invited_user_avatar_url: string | null;
   invited_by: number;
   invited_by_name: string;
-  status: "pending" | "accepted" | "declined" | "revoked";
+  status: "pending" | "accepted" | "declined" | "revoked" | "expired";
   created_at: string;
   responded_at: string | null;
   expires_at: string | null;
@@ -29,6 +29,7 @@ function statusBadge(s: string) {
   if (s === "pending") return "text-amber-900 bg-amber-100";
   if (s === "accepted") return "text-fern-900 bg-fern-100";
   if (s === "declined") return "text-charcoal/50 bg-charcoal/5";
+  if (s === "expired") return "text-charcoal/50 bg-charcoal/5";
   return "text-rose-900 bg-rose-100";
 }
 
@@ -36,6 +37,7 @@ function statusLabel(s: string) {
   if (s === "pending") return "In attesa";
   if (s === "accepted") return "Accettato";
   if (s === "declined") return "Rifiutato";
+  if (s === "expired") return "Scaduto";
   return "Revocato";
 }
 

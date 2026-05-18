@@ -59,6 +59,11 @@ export async function PATCH(request: Request, context: Context) {
     );
   }
 
+  await execute(
+    "DELETE FROM notifications WHERE user_id = ? AND type = 'group_member_invite' AND group_id = ?",
+    [user.id, groupId],
+  );
+
   return NextResponse.json({ ok: true });
 }
 
@@ -90,6 +95,11 @@ export async function DELETE(request: Request, context: Context) {
   await execute(
     "UPDATE group_member_invites SET status = 'revoked', responded_at = CURRENT_TIMESTAMP WHERE id = ?",
     [invite],
+  );
+
+  await execute(
+    "DELETE FROM notifications WHERE user_id = ? AND type = 'group_member_invite' AND group_id = ?",
+    [inviteRow.invited_user_id, groupId],
   );
 
   await recordAuditLog({

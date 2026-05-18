@@ -11,9 +11,10 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const filter = url.searchParams.get("filter") ?? "all";
+  const q = url.searchParams.get("q") ?? "";
   const page = Math.max(Number(url.searchParams.get("page") ?? 0), 0);
 
-  return NextResponse.json(await getGroups(user.id, filter, page));
+  return NextResponse.json(await getGroups(user.id, filter, page, q));
 }
 
 export async function POST(request: Request) {
