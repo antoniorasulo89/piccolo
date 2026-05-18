@@ -88,6 +88,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
             notify_likes: Boolean(user.notify_likes),
             notify_comments: Boolean(user.notify_comments),
             notify_follows: Boolean(user.notify_follows),
+            notify_group_posts: Boolean(user.notify_group_posts),
           }}
         />
       </div>

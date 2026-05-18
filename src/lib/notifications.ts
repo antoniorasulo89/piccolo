@@ -123,7 +123,10 @@ export async function createGroupPostNotification({
   postId: number;
 }) {
   const members = await queryAll<{ user_id: number }>(
-    "SELECT user_id FROM group_members WHERE group_id = ? AND status = 'active' AND user_id != ?",
+    `SELECT gm.user_id FROM group_members gm
+     JOIN users u ON u.id = gm.user_id
+     WHERE gm.group_id = ? AND gm.status = 'active' AND gm.user_id != ?
+       AND u.notify_group_posts = 1`,
     [groupId, actorId],
   );
 

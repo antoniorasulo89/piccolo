@@ -93,6 +93,7 @@ export const notificationPreferencesSchema = z.object({
   notify_likes: z.boolean().optional().default(true),
   notify_comments: z.boolean().optional().default(true),
   notify_follows: z.boolean().optional().default(true),
+  notify_group_posts: z.boolean().optional().default(true),
 });
 
 export const groupRequestResolutionSchema = z.object({

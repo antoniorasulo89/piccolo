@@ -8,6 +8,8 @@ type PostRow = {
   created_at: string;
   edited_at: string | null;
   group_id?: number | null;
+  group_name?: string | null;
+  group_slug?: string | null;
   user_id: number;
   name: string;
   role: "admin" | "user";
@@ -18,7 +20,7 @@ type PostRow = {
   i_bookmarked: 0 | 1;
 };
 
-export type FeedScope = "following" | "all";
+export type FeedScope = "following" | "all" | "groups";
 
 export type CommentWithAuthor = {
   id: number;
@@ -69,7 +71,7 @@ export type ProfileComment = {
   post_content: string;
 };
 
-function mapPost(row: PostRow): PostWithAuthor {
+function mapPost(row: PostRow): PostWithAuthor & { group_name?: string | null; group_slug?: string | null } {
   return {
     id: row.id,
     content: row.content,
@@ -79,6 +81,8 @@ function mapPost(row: PostRow): PostWithAuthor {
     comments_count: row.comments_count,
     i_liked: Boolean(row.i_liked),
     i_bookmarked: Boolean(row.i_bookmarked),
+    group_name: row.group_name,
+    group_slug: row.group_slug,
     user: {
       id: row.user_id,
       name: row.name,
@@ -118,6 +122,31 @@ export async function getFeedPosts(
   scope: FeedScope = "following",
 ) {
   const offset = Math.max(page, 0) * PAGE_SIZE;
+
+  if (scope === "groups") {
+    const rows = await queryAll<PostRow>(
+      `
+        SELECT p.id, p.content, p.created_at, p.edited_at, p.group_id, p.user_id, u.name, u.role, u.avatar_url,
+          g.name AS group_name, g.slug AS group_slug,
+          COUNT(l.post_id) AS likes_count,
+          (SELECT COUNT(*) FROM comments c WHERE c.post_id = p.id) AS comments_count,
+          EXISTS(SELECT 1 FROM likes mine WHERE mine.user_id = ? AND mine.post_id = p.id) AS i_liked,
+          EXISTS(SELECT 1 FROM bookmarks bm WHERE bm.user_id = ? AND bm.post_id = p.id) AS i_bookmarked
+        FROM posts p
+        JOIN users u ON u.id = p.user_id
+        JOIN groups g ON g.id = p.group_id
+        JOIN group_members gm ON gm.group_id = p.group_id AND gm.user_id = ? AND gm.status = 'active'
+        LEFT JOIN likes l ON l.post_id = p.id
+        WHERE p.group_id IS NOT NULL
+        GROUP BY p.id
+        ORDER BY p.created_at DESC
+        LIMIT ? OFFSET ?
+      `,
+      [userId, userId, userId, PAGE_LIMIT, offset],
+    );
+    return rows.map(mapPost);
+  }
+
   const where =
     scope === "all"
       ? "WHERE p.group_id IS NULL"

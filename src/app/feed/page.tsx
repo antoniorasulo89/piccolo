@@ -26,7 +26,8 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
   }
 
   const params = await searchParams;
-  const scope: FeedScope = params.scope === "all" ? "all" : "following";
+  const scope: FeedScope =
+    params.scope === "all" ? "all" : params.scope === "groups" ? "groups" : "following";
   const [posts, suggestedUsers] = await Promise.all([
     getFeedPosts(user.id, 0, scope),
     getSuggestedUsers(user.id),
@@ -42,7 +43,7 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
             Feed
           </p>
           <h1 className="mt-2 text-3xl font-semibold tracking-tight text-charcoal">
-            La tua timeline
+            {scope === "groups" ? "Post dai tuoi gruppi" : "La tua timeline"}
           </h1>
           </div>
           <FeedTabs scope={scope} />
@@ -58,12 +59,16 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
           ) : (
             <div className="py-12">
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">
-                Qui appariranno i post della tua community.
+                {scope === "groups"
+                  ? "Nessun post nei tuoi gruppi."
+                  : "Qui appariranno i post della tua community."}
               </h2>
               <p className="mt-2 max-w-[52ch] leading-7 text-charcoal/58">
-                {scope === "following"
-                  ? "Pubblica il primo post o segui qualcuno: vedrai i contenuti delle persone che scegli."
-                  : "Non ci sono ancora post pubblici. Appena qualcuno scrive, lo vedrai qui."}
+                {scope === "groups"
+                  ? "I post pubblicati nei gruppi di cui sei membro appariranno qui."
+                  : scope === "following"
+                    ? "Pubblica il primo post o segui qualcuno: vedrai i contenuti delle persone che scegli."
+                    : "Non ci sono ancora post pubblici. Appena qualcuno scrive, lo vedrai qui."}
               </p>
               <Link
                 href="/explore"

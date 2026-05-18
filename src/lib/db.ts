@@ -397,6 +397,11 @@ export async function migrate() {
     await db.execute("ALTER TABLE users ADD COLUMN notify_follows INTEGER NOT NULL DEFAULT 1");
   }
 
+  const hasNotifyGroupPosts = columns.rows.some((column) => column.name === "notify_group_posts");
+  if (!hasNotifyGroupPosts) {
+    await db.execute("ALTER TABLE users ADD COLUMN notify_group_posts INTEGER NOT NULL DEFAULT 1");
+  }
+
   const postColumns = await db.execute("PRAGMA table_info(posts)");
   const hasPostGroupId = postColumns.rows.some((column) => column.name === "group_id");
   const hasPostEditedAt = postColumns.rows.some((column) => column.name === "edited_at");
@@ -503,6 +508,7 @@ export type PublicUser = {
   notify_likes: 0 | 1 | boolean;
   notify_comments: 0 | 1 | boolean;
   notify_follows: 0 | 1 | boolean;
+  notify_group_posts: 0 | 1 | boolean;
   created_at: string;
   is_new?: 0 | 1 | boolean;
 };

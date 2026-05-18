@@ -16,19 +16,21 @@ export async function PATCH(request: Request) {
   const notifyLikes = data.notify_likes ? 1 : 0;
   const notifyComments = data.notify_comments ? 1 : 0;
   const notifyFollows = data.notify_follows ? 1 : 0;
+  const notifyGroupPosts = data.notify_group_posts ? 1 : 0;
 
   await execute(
     `
       UPDATE users
-      SET notify_likes = ?, notify_comments = ?, notify_follows = ?
+      SET notify_likes = ?, notify_comments = ?, notify_follows = ?, notify_group_posts = ?
       WHERE id = ?
     `,
-    [notifyLikes, notifyComments, notifyFollows, user.id],
+    [notifyLikes, notifyComments, notifyFollows, notifyGroupPosts, user.id],
   );
 
   return NextResponse.json({
     notify_likes: Boolean(notifyLikes),
     notify_comments: Boolean(notifyComments),
     notify_follows: Boolean(notifyFollows),
+    notify_group_posts: Boolean(notifyGroupPosts),
   });
 }

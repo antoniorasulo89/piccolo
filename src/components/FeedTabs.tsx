@@ -8,13 +8,14 @@ type FeedTabsProps = {
 const tabs: Array<{ href: string; value: FeedScope; label: string }> = [
   { href: "/feed", value: "following", label: "Seguiti" },
   { href: "/feed?scope=all", value: "all", label: "Tutti" },
+  { href: "/feed?scope=groups", value: "groups", label: "Gruppi" },
 ];
 
 export function FeedTabs({ scope }: FeedTabsProps) {
   return (
     <nav
       aria-label="Filtro feed"
-      className="grid grid-cols-2 rounded-lg border border-charcoal/10 bg-paper/88 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
+      className="grid grid-cols-3 rounded-lg border border-charcoal/10 bg-paper/88 p-1 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]"
     >
       {tabs.map((tab) => (
         <Link

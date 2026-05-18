@@ -9,6 +9,7 @@ type NotificationPreferencesFormProps = {
     notify_likes: boolean;
     notify_comments: boolean;
     notify_follows: boolean;
+    notify_group_posts: boolean;
   };
 };
 
@@ -43,11 +44,12 @@ export function NotificationPreferencesForm({
         <SlidersHorizontal size={18} className="text-fern-900" />
         <h2 className="font-semibold text-charcoal">Preferenze</h2>
       </div>
-      <div className="mt-3 grid gap-2 sm:grid-cols-3">
+      <div className="mt-3 grid gap-2 sm:grid-cols-2">
         {[
           ["notify_likes", "Like"],
           ["notify_comments", "Commenti"],
           ["notify_follows", "Follow"],
+          ["notify_group_posts", "Post nei gruppi"],
         ].map(([key, label]) => (
           <label
             key={key}

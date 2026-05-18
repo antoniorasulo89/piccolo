@@ -56,7 +56,7 @@ export function ComposeBox() {
         onChange={(event) => setContent(event.target.value)}
         maxLength={280}
         rows={4}
-        placeholder="Condividi un pensiero con il gruppo."
+        placeholder="Condividi un pensiero."
         className="relative mt-3 min-h-32 w-full resize-none rounded-lg border border-charcoal/10 bg-paper/92 px-3 py-3 text-base leading-7 text-charcoal outline-none transition placeholder:text-charcoal/35 focus:border-clay focus:ring-4 focus:ring-clay/15 sm:min-h-28"
       />
       <div className="mt-3 flex items-center justify-between gap-3">

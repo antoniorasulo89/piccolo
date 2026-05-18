@@ -10,7 +10,7 @@ import { ReportPostButton } from "./ReportPostButton";
 import { UserAvatar } from "./UserAvatar";
 
 type PostCardProps = {
-  post: PostWithAuthor;
+  post: PostWithAuthor & { group_name?: string | null; group_slug?: string | null };
   currentUserId: number;
   staggerIndex?: number;
 };
@@ -56,6 +56,14 @@ export function PostCard({ post, currentUserId, staggerIndex = 0 }: PostCardProp
                 {post.user.name}
               </Link>
               <p className="font-mono text-xs text-charcoal/45">{relativeTime(post.created_at)}</p>
+              {"group_name" in post && post.group_name ? (
+                <Link
+                  href={`/groups/${post.group_slug}`}
+                  className="mt-0.5 inline-flex items-center gap-1 text-xs font-medium text-fern-900/70 hover:text-fern-900 hover:underline"
+                >
+                  nel gruppo {post.group_name}
+                </Link>
+              ) : null}
               <div className="mt-1">
                 <ProfileBadges
                   role={post.user.role ?? "user"}
