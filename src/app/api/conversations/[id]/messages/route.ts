@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { queryAll } from "@/lib/db";
+import { execute, queryAll } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { createMessage, isConversationMember } from "@/lib/messages";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
@@ -36,6 +36,8 @@ export async function GET(request: Request, context: Context) {
     [conversationId, since],
   );
 
+  markRead(conversationId, user.id).catch(() => {});
+
   return NextResponse.json(
     rows.map((r) => {
       const row = r as Record<string, unknown>;
@@ -51,6 +53,13 @@ export async function GET(request: Request, context: Context) {
         },
       };
     }),
+  );
+}
+
+async function markRead(conversationId: number, userId: number) {
+  await execute(
+    "UPDATE conversation_members SET last_read_at = CURRENT_TIMESTAMP WHERE conversation_id = ? AND user_id = ?",
+    [conversationId, userId],
   );
 }
 

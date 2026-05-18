@@ -1,12 +1,10 @@
 "use client";
 
 import { Eye, EyeSlash, Trash } from "@phosphor-icons/react";
-import { useRouter } from "next/navigation";
 import { useState, useTransition } from "react";
 import { showToast } from "@/components/ToastProvider";
 
 export function NotificationActions({ id, isRead }: { id: number; isRead: boolean }) {
-  const router = useRouter();
   const [read, setRead] = useState(isRead);
   const [deleted, setDeleted] = useState(false);
   const [pending, startTransition] = useTransition();
@@ -20,7 +18,6 @@ export function NotificationActions({ id, isRead }: { id: number; isRead: boolea
       const data = await res.json();
       setRead(data.read);
       window.dispatchEvent(new CustomEvent("piccolo:refresh-counts"));
-      router.refresh();
     });
   }
 
@@ -33,7 +30,6 @@ export function NotificationActions({ id, isRead }: { id: number; isRead: boolea
       }
       setDeleted(true);
       window.dispatchEvent(new CustomEvent("piccolo:refresh-counts"));
-      router.refresh();
     });
   }
 

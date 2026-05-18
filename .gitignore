@@ -46,6 +46,9 @@ yarn-error.log*
 # vercel
 .vercel
 
+# stray empty dirs
+src/app/api/conversations/[id]/messages-since/
+
 # test artifacts
 playwright-report/
 test-results/
