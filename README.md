@@ -1,84 +1,132 @@
-# Piccolo — Meno rumore. Più relazione.
+# Piccolo - Meno rumore. Piu relazione.
 
-Un social network privato e leggero per community raccolte. Costruito con Next.js, SQLite/Turso, JWT e Tailwind CSS.
+Social network privato e leggero per community raccolte: profili, feed, gruppi pubblici/privati, messaggi, notifiche, moderazione e console admin.
 
-## Funzionalità
+Costruito con Next.js, SQLite/Turso, JWT, Resend e Tailwind CSS.
+
+## Stato
+
+Beta privata pronta per pilot controllato.
+
+- Deploy: Vercel
+- Database: SQLite locale / Turso cloud
+- Auth: email/password, JWT in cookie `httpOnly`
+- Lingua prodotto: italiano
+- Target: community piccole, corsi, gruppi privati, organizzazioni leggere
+
+## Funzionalita
 
 ### Utenti e profili
-- Registrazione e login con email/password
-- Cookie `httpOnly` con JWT firmato (jose + bcryptjs)
-- Profili con bio, avatar, cover image, badge ruolo
-- Privacy: email visibile/nascosta, profilo discoverable
-- Preferenze tema (light/dark/system) per-utente
-- Onboarding post-registrazione
-- Follow/unfollow con UI ottimistica
 
-### Contenuti
-- Post testuali fino a 280 caratteri
-- Like toggle con UI ottimistica
-- Commenti con modifica ed eliminazione
-- Bookmark/salvataggio post con pagina dedicata
-- Editing post e commenti con timestamp `edited_at`
-- Full-text search FTS5 con ranking BM25
+- Registrazione e login con email/password.
+- Primo utente registrato promosso automaticamente ad admin.
+- Password con bcrypt 12 round.
+- Cookie `httpOnly`, `sameSite=lax`, `secure` in produzione.
+- Reset password self-service via email Resend.
+- Reset password assistito da admin con token SHA256 e scadenza.
+- Profili con bio, avatar, cover image e badge ruolo.
+- Privacy profilo: email visibile/nascosta e profilo discoverable.
+- Preferenze tema: light, dark, system.
+- Onboarding post-registrazione.
+- Follow/unfollow con UI ottimistica.
 
-### Community
-- **Gruppi** pubblici e privati con ruoli (owner/moderator/member)
-- Richieste di accesso per gruppi privati
-- Post di gruppo con moderazione
-- Link di invito con token monouso/N-uso e scadenza configurabile
-- Post fissati in gruppi (annunci, regole)
-- Feed aggregato gruppi: `/feed?scope=groups` mostra i post di tutti i tuoi gruppi
+### Feed e contenuti
+
+- Post testuali fino a 280 caratteri.
+- Feed `following`, `all` e `groups`.
+- Feed gruppi aggregato: `/feed?scope=groups`.
+- Like toggle con UI ottimistica.
+- Commenti con modifica ed eliminazione.
+- Bookmark/salvataggio post con pagina dedicata.
+- Editing post/commenti con timestamp `edited_at`.
+- Full-text search FTS5 con ranking BM25.
+
+### Gruppi
+
+- Gruppi pubblici e privati.
+- Ruoli: `owner`, `co_owner`, `moderator`, `member`.
+- Privacy modificabile dopo la creazione.
+- Tab gruppo: Post, Membri, Inviti, Impostazioni.
+- Lista membri con avatar, nome e ruolo.
+- Owner/co-owner/admin possono gestire impostazioni, richieste e inviti.
+- Moderator puo moderare contenuti ed espellere membri normali, senza governare privacy/inviti.
+- Admin platform ha override completo, tracciato in audit log.
+- Richieste di accesso per gruppi privati.
+- Link invito sicuri con scadenza, numero massimo di utilizzi, revoca e stato.
+- Inviti diretti a utenti registrati.
+- Notifica invito diretto con azioni inline: Entra / Rifiuta.
+- Re-invito possibile dopo rifiuto o revoca.
+- Post di gruppo e post fissati.
+- Espulsione membri con protezioni sui ruoli.
+- Ricerca gruppi per nome/descrizione.
 
 ### Messaggistica
-- **Messaggi diretti** (DM 1:1 e chat di gruppo)
-- Unread count con badge in navbar e MobileTabBar
-- Read receipts per conversazione
-- Polling 30s + event bus per refresh badge
+
+- DM 1:1 e chat di gruppo.
+- Lista conversazioni con aggiornamento live.
+- Messaggi live nella conversazione aperta tramite polling incrementale `since`.
+- Badge unread desktop/mobile condivisi da hook singleton.
+- Read state per conversazione tramite `last_read_at`.
 
 ### Notifiche
-- Notifiche per like, commenti, follow, post nei gruppi
-- Filtro "solo non lette"
-- Mark all read con un click
-- Preferenze per tipo notifica (opt-out like/comment/follow/group_post)
-- Badge notifiche con animazione pulse
+
+- Notifiche per like, commenti, follow, post nei gruppi e inviti gruppo diretti.
+- Badge notifiche e messaggi in navbar desktop e MobileTabBar.
+- Aggiornamento badge live con polling visibility-aware.
+- Apertura pagina notifiche: auto-mark come lette.
+- Azioni per singola notifica: mark read/unread, delete.
+- Filtro "Non lette".
+- Preferenze notifica per like, commenti, follow e post nei gruppi.
 
 ### Admin
-- Console amministratore con 12 metriche in tempo reale
-- Gestione utenti: promuovi/retrocedi admin, sospendi/riattiva
-- Reset password assistito (token SHA256 con scadenza 30 min)
-- Sistema report: categorie (spam/abuso/privacy/altro), risoluzione con note
-- Moderazione contenuti: eliminazione post e commenti
-- Audit log: ogni azione admin tracciata
-- Audit automatico delle route admin (script `audit:admin`)
+
+- Console admin con sezioni per metriche, utenti, gruppi, contenuti, report e audit log.
+- Gestione utenti: promuovi/retrocedi admin, sospendi/riattiva.
+- Reset password assistito.
+- Moderazione post/commenti.
+- Moderazione gruppi: lista gruppi, stato privacy, owner, membri, post count, link gestione.
+- Sistema report con categorie e risoluzione.
+- Audit log per azioni admin e governance gruppi.
+- Audit automatico route admin via `npm run audit:admin`.
 
 ### UX
-- Design system OKLCH: palette `fern/clay/rose/charcoal/paper/surface`
-- Dark mode automatica via `prefers-color-scheme`
-- Landing page con brand identity ("Meno rumore. Più relazione.")
-- Mobile-first: MobileTabBar 6 tab con badge, Navbar glassmorphism
-- Empty states composti su 6 schermate
-- Animazioni CSS leggere (stagger reveal, like-pop, shimmer skeleton)
-- `prefers-reduced-motion` rispettato
-- Toast notification system event-driven
+
+- Design system OKLCH: `fern`, `clay`, `rose`, `charcoal`, `paper`, `surface`.
+- Dark mode automatica via `prefers-color-scheme`.
+- Mobile-first: MobileTabBar a 6 tab con badge.
+- Empty states contestuali.
+- Toast notification system event-driven.
+- Animazioni leggere: reveal, like-pop, shimmer, pulse.
+- `prefers-reduced-motion` rispettato.
 
 ### Sicurezza
-- Password bcrypt 12 round, JWT HS256 con secret ≥32 char
-- Cookie `httpOnly`, `sameSite=lax`, `secure` in produzione
-- Rate limiting in-memory per login, register, forgot-password, post
-- Reset password self-service (via email Resend)
-- Security headers: X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy
-- HSTS preload attivo
-- Secret scanning (gitleaks) in CI + pre-commit hook
-- 100% query parametrizzate (zero SQL injection)
-- Open redirect protection su `?redirect=` (login)
+
+- JWT HS256 con secret minimo 32 caratteri.
+- Query parametrizzate.
+- Zod sui body API.
+- Rate limit in-memory per login, register, forgot-password, post e creazione gruppi.
+- Token sensibili salvati come hash SHA256.
+- Protezione open redirect su `?redirect=`.
+- Header sicurezza in produzione:
+  - `Strict-Transport-Security`
+  - `X-Frame-Options`
+  - `X-Content-Type-Options`
+  - `Referrer-Policy`
+  - `Permissions-Policy`
+- `X-Powered-By` rimosso.
+- Secret scanning con gitleaks in CI.
+- Audit route auth tracciate da Git via `npm run audit:tracked`.
 
 ### DevOps
-- **CI/CD**: GitHub Actions (lint, build, admin audit, secret scan, E2E tests)
-- **Deploy**: Vercel + Turso (cloud DB), ~40s build
-- **Backup**: GitHub Actions cron settimanale con dump Turso
-- **Monitoring**: healthcheck endpoint `/api/health`
-- E2E tests Playwright (3 flow critici: register+post+like, follow+unfollow, admin suspend)
-- DB migrazioni idempotenti con `_meta.schema_version`
+
+- CI GitHub Actions con lint, build, audit admin, audit tracked, secret scan, E2E.
+- Deploy automatico su Vercel.
+- Checklist post-deploy in `DEPLOY-CHECKLIST.md`.
+- Healthcheck: `/api/health`.
+- Backup Turso con workflow GitHub Actions.
+- Smoke restore locale con `npm run test:restore`.
+- E2E Playwright per flow critici.
+- Migrazioni DB idempotenti.
 
 ## Setup locale
 
@@ -89,72 +137,143 @@ npm run db:init
 npm run dev
 ```
 
-Apri [http://localhost:3000](http://localhost:3000).
+Apri:
 
-`JWT_SECRET` deve essere una stringa casuale di almeno 32 caratteri. Per generarne una:
+```text
+http://localhost:3000
+```
+
+`JWT_SECRET` deve essere una stringa casuale di almeno 32 caratteri.
+
+Generazione rapida:
 
 ```bash
 node -e "console.log(require('crypto').randomBytes(32).toString('hex'))"
 ```
 
-Il primo utente registrato diventa automaticamente amministratore. Puoi anche
-predefinire email admin con:
+Admin iniziali opzionali:
 
 ```bash
 ADMIN_EMAILS=nome@example.com,altro@example.com
 ```
 
+Se `TURSO_DATABASE_URL` non e presente, l'app usa `data/social.db`.
+
+## Variabili ambiente
+
+Minime:
+
+```bash
+JWT_SECRET=
+ADMIN_EMAILS=
+TURSO_DATABASE_URL=
+TURSO_AUTH_TOKEN=
+```
+
+Email:
+
+```bash
+RESEND_API_KEY=
+RESEND_FROM=
+```
+
+Test:
+
+```bash
+TEST_DB_PATH=
+```
+
 ## Comandi
 
 ```bash
-npm run dev          # Server sviluppo
-npm run build        # Build produzione
-npm run lint         # ESLint
-npm run db:init      # Inizializza database
-npm run test:e2e     # Playwright E2E tests
-npm run test:restore # Smoke test backup restore
-npm run audit:admin  # Verifica guard admin routes
-npm run audit:tracked# Verifica route auth tracciate da Git
-npm run secrets:scan # Gitleaks scan
+npm run dev           # Server sviluppo
+npm run build         # Build produzione
+npm run start         # Avvio build produzione
+npm run lint          # ESLint
+npm run db:init       # Inizializza/migra database
+npm run audit:admin   # Verifica guard admin routes
+npm run audit:tracked # Verifica route auth tracciate da Git
+npm run test:e2e      # Playwright E2E tests
+npm run test:restore  # Smoke test backup restore (richiede env Turso)
+npm run secrets:scan  # Gitleaks scan
 ```
 
 ## Deploy
 
-Per pubblicare gratis:
-
-1. Crea un database [Turso](https://turso.tech) Free.
-2. Imposta su Vercel le variabili d'ambiente:
-   - `JWT_SECRET` — stringa casuale ≥32 caratteri
-   - `ADMIN_EMAILS` — email degli admin iniziali (opzionale)
-   - `TURSO_DATABASE_URL` — URL del database Turso
-   - `TURSO_AUTH_TOKEN` — token di autenticazione Turso
-3. Connetti il repo GitHub a Vercel per deploy automatico.
-4. Esegui `npm run db:init` contro il database Turso di produzione per creare le tabelle.
-
-In locale, se `TURSO_DATABASE_URL` non è presente, l'app usa `data/social.db`.
+1. Crea un database Turso.
+2. Imposta su Vercel le variabili:
+   - `JWT_SECRET`
+   - `ADMIN_EMAILS` opzionale
+   - `TURSO_DATABASE_URL`
+   - `TURSO_AUTH_TOKEN`
+   - `RESEND_API_KEY` opzionale ma richiesto per email reali
+   - `RESEND_FROM` opzionale
+3. Connetti il repo GitHub a Vercel.
+4. Verifica che la production branch sia `master`.
+5. Verifica che Vercel auto-assegni il dominio production al deploy fresco.
+6. Esegui le verifiche in `DEPLOY-CHECKLIST.md`.
 
 ### Healthcheck
 
+```text
+GET /api/health -> { "ok": true, "db": true }
 ```
-GET /api/health → { "ok": true, "db": true }
+
+### Checklist post-deploy
+
+Dopo ogni deploy:
+
+```bash
+curl -i https://my-social-hazel.vercel.app/api/auth/me
+curl -i https://my-social-hazel.vercel.app/api/health
 ```
 
-Puoi usare [UptimeRobot](https://uptimerobot.com) (gratuito) per monitorare l'uptime.
+Atteso:
 
-### Deploy checklist
+- `/api/auth/me` -> `401` JSON con `X-Matched-Path: /api/auth/me`
+- `/api/health` -> `200` JSON
 
-Dopo ogni deploy, esegui le verifiche in [`DEPLOY-CHECKLIST.md`](./DEPLOY-CHECKLIST.md) per assicurarti che l'alias di produzione sia correttamente promosso.
+Se `X-Matched-Path` mostra `/_not-found`, l'alias produzione non punta al deploy corretto.
+
+## Database
+
+SQLite locale / Turso cloud.
+
+Elementi principali:
+
+- utenti, profili, preferenze privacy/notifiche
+- post, commenti, like, bookmark
+- gruppi, membri, richieste, link invito, inviti diretti
+- conversazioni, membri conversazione, messaggi
+- notifiche con `post_id`, `comment_id`, `group_id`
+- report post/messaggi/gruppi
+- audit log
+- FTS5 per ricerca post
+
+Il backup esclude le shadow table FTS. Dopo un restore, eseguire:
+
+```bash
+npm run db:init
+```
 
 ## Stack
 
-- **Framework**: Next.js 16 App Router (React 19, TypeScript 5, Turbopack)
-- **Database**: SQLite locale / Turso cloud (`@libsql/client`) con 20 tabelle + FTS5
-- **Auth**: JWT (`jose`) + bcryptjs, cookie httpOnly
-- **Stile**: Tailwind CSS 4, Phosphor Icons, design system OKLCH
-- **Validazione**: Zod
-- **Test**: Playwright (E2E), Vitest (previsto)
-- **CI/CD**: GitHub Actions + Vercel auto-deploy
-- **Backup**: GitHub Actions cron + Turso dump
+- Framework: Next.js 16 App Router, React 19, TypeScript 5, Turbopack
+- Database: SQLite / Turso, `@libsql/client`
+- Auth: `jose`, `bcryptjs`, cookie `httpOnly`
+- Email: Resend
+- UI: Tailwind CSS 4, Phosphor Icons
+- Validazione: Zod
+- Test: Playwright
+- CI/CD: GitHub Actions + Vercel
+- Backup: GitHub Actions cron + Turso dump
+
+## Note operative
+
+- Eseguire i gate npm in sequenza, non in parallelo.
+- Dopo ogni implementazione, verificare che i file dichiarati siano tracciati da Git.
+- Per API con Zod, verificare sempre che il client invii body coerenti con lo schema.
+- Per feature live/polling, verificare anche lo stato server collegato: unread, `last_read_at`, notifiche.
 
 ## Licenza
 
