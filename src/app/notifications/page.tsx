@@ -27,14 +27,15 @@ function relativeTime(value: string) {
 function notificationCopy(type: string) {
   if (type === "like") return "ha messo like a un tuo post";
   if (type === "comment") return "ha commentato un tuo post";
+  if (type === "group_post") return "ha pubblicato nel gruppo";
   return "ha iniziato a seguirti";
 }
 
 function NotificationIcon({ type }: { type: string }) {
-  const className = "text-fern-900";
   if (type === "like") return <Heart size={18} weight="fill" className="text-rose-900" />;
-  if (type === "comment") return <ChatCircleText size={18} weight="bold" className={className} />;
-  return <UserPlus size={18} weight="bold" className={className} />;
+  if (type === "comment") return <ChatCircleText size={18} weight="bold" className="text-fern-900" />;
+  if (type === "group_post") return <ChatCircleText size={18} weight="bold" className="text-clay-900" />;
+  return <UserPlus size={18} weight="bold" className="text-fern-900" />;
 }
 
 type NotificationsPageProps = {

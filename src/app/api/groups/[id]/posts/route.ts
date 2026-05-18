@@ -3,6 +3,7 @@ import { getCurrentUser } from "@/lib/auth";
 import { getGroupMembership } from "@/lib/community";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
+import { createGroupPostNotification } from "@/lib/notifications";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
 import { postSchema } from "@/lib/schemas";
 
@@ -40,5 +41,8 @@ export async function POST(request: Request, context: Context) {
     content,
   ]);
 
-  return NextResponse.json({ id: Number(result.lastInsertRowid) }, { status: 201 });
+  const postId = Number(result.lastInsertRowid);
+  createGroupPostNotification({ groupId, actorId: user.id, postId }).catch(() => {});
+
+  return NextResponse.json({ id: postId }, { status: 201 });
 }

@@ -2,7 +2,7 @@
 
 import { ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
 
 type AuthFormProps = {
@@ -11,6 +11,8 @@ type AuthFormProps = {
 
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const redirectTo = searchParams.get("redirect");
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
   const isRegister = mode === "register";
@@ -36,7 +38,13 @@ export function AuthForm({ mode }: AuthFormProps) {
       }
 
       const body = await response.json();
-      router.push(isRegister ? "/login" : body.onboarded ? "/feed" : "/onboarding");
+      if (isRegister) {
+        router.push("/login");
+      } else if (redirectTo) {
+        router.push(redirectTo);
+      } else {
+        router.push(body.onboarded ? "/feed" : "/onboarding");
+      }
       router.refresh();
     });
   }
@@ -115,7 +123,9 @@ export function AuthForm({ mode }: AuthFormProps) {
       </p>
       {!isRegister ? (
         <p className="text-sm text-charcoal/50">
-          Password dimenticata? Chiedi a un admin un link reset temporaneo.
+          <Link href="/forgot-password" className="font-semibold text-fern-900 underline-offset-4 hover:underline">
+            Password dimenticata?
+          </Link>
         </p>
       ) : null}
     </form>

@@ -27,6 +27,10 @@ export default function GroupJoinPage() {
           body: JSON.stringify({ token }),
         });
         const data = await res.json();
+        if (res.status === 401) {
+          router.push(`/login?redirect=/groups/join?token=${encodeURIComponent(token)}`);
+          return;
+        }
         if (!res.ok) {
           setError(data.error ?? "Impossibile unirsi al gruppo.");
           return;

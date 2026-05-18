@@ -1,12 +1,18 @@
+import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/AuthForm";
 import { getCurrentUser } from "@/lib/auth";
 
-export default async function LoginPage() {
+type LoginPageProps = {
+  searchParams: Promise<{ redirect?: string }>;
+};
+
+export default async function LoginPage({ searchParams }: LoginPageProps) {
   const user = await getCurrentUser();
+  const { redirect: redirectTo } = await searchParams;
 
   if (user) {
-    redirect("/feed");
+    redirect(redirectTo ?? "/feed");
   }
 
   return (
@@ -16,9 +22,11 @@ export default async function LoginPage() {
           Bentornato
         </p>
         <h1 className="mt-4 text-4xl font-semibold tracking-tight text-charcoal">
-          Accedi e torna al tuo feed.
+          {redirectTo ? "Accedi per continuare." : "Accedi e torna al tuo feed."}
         </h1>
-        <AuthForm mode="login" />
+        <Suspense>
+          <AuthForm mode="login" />
+        </Suspense>
       </section>
       <aside className="hidden border-l border-charcoal/10 pl-12 text-charcoal/58 lg:block">
         <p className="max-w-[42ch] text-lg leading-8">

@@ -1,7 +1,7 @@
 import { execute, queryAll, queryOne } from "./db";
 import { PAGE_LIMIT, PAGE_SIZE } from "./pagination";
 
-export type NotificationType = "like" | "comment" | "follow";
+export type NotificationType = "like" | "comment" | "follow" | "group_post";
 
 export type NotificationItem = {
   id: number;
@@ -111,4 +111,26 @@ export async function markNotificationsRead(userId: number) {
     "UPDATE notifications SET read_at = CURRENT_TIMESTAMP WHERE user_id = ? AND read_at IS NULL",
     [userId],
   );
+}
+
+export async function createGroupPostNotification({
+  groupId,
+  actorId,
+  postId,
+}: {
+  groupId: number;
+  actorId: number;
+  postId: number;
+}) {
+  const members = await queryAll<{ user_id: number }>(
+    "SELECT user_id FROM group_members WHERE group_id = ? AND status = 'active' AND user_id != ?",
+    [groupId, actorId],
+  );
+
+  for (const member of members) {
+    await execute(
+      "INSERT INTO notifications (user_id, actor_id, type, post_id) VALUES (?, ?, 'group_post', ?)",
+      [member.user_id, actorId, postId],
+    );
+  }
 }
