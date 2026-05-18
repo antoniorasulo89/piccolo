@@ -353,6 +353,18 @@ export async function migrate() {
     `,
       "CREATE INDEX IF NOT EXISTS idx_group_member_invites_user ON group_member_invites(invited_user_id, group_id)",
       `
+      CREATE TABLE IF NOT EXISTS user_blocks (
+        blocker_id INTEGER NOT NULL,
+        blocked_id INTEGER NOT NULL,
+        created_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        PRIMARY KEY (blocker_id, blocked_id),
+        CHECK (blocker_id != blocked_id),
+        FOREIGN KEY (blocker_id) REFERENCES users(id) ON DELETE CASCADE,
+        FOREIGN KEY (blocked_id) REFERENCES users(id) ON DELETE CASCADE
+      )
+    `,
+      "CREATE INDEX IF NOT EXISTS idx_user_blocks_blocked ON user_blocks(blocked_id, blocker_id)",
+      `
       INSERT INTO _meta (key, value)
       VALUES ('schema_version', '${SCHEMA_VERSION}')
       ON CONFLICT(key) DO UPDATE SET
@@ -510,6 +522,14 @@ export async function migrate() {
     await db.execute("ALTER TABLE audit_logs ADD COLUMN admin_override INTEGER NOT NULL DEFAULT 0");
     await db.execute("UPDATE audit_logs SET admin_override = 1 WHERE note LIKE '%admin_override=true%'");
     await db.execute("CREATE INDEX IF NOT EXISTS idx_audit_admin_override ON audit_logs(admin_override)");
+  }
+
+  const convMemColumns = await db.execute("PRAGMA table_info(conversation_members)");
+  const hasLeftAt = convMemColumns.rows.some((column) => column.name === "left_at");
+  if (!hasLeftAt) {
+    await db.execute("ALTER TABLE conversation_members ADD COLUMN left_at TEXT DEFAULT NULL");
+    await db.execute("ALTER TABLE conversation_members ADD COLUMN archived_at TEXT DEFAULT NULL");
+    await db.execute("CREATE INDEX IF NOT EXISTS idx_conversation_members_archived ON conversation_members(user_id, archived_at)");
   }
 
   globalDb.__socialDbMigrated = true;

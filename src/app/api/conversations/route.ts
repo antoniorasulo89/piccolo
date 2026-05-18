@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlocked } from "@/lib/blocks";
 import { queryAll } from "@/lib/db";
 import { createConversation, getConversations } from "@/lib/messages";
 import { jsonError, parseJson } from "@/lib/http";
@@ -23,6 +24,12 @@ export async function POST(request: Request) {
 
   if (!memberIds.length) {
     return jsonError("Scegli almeno una persona.");
+  }
+
+  for (const memberId of memberIds) {
+    if (await isBlocked(user.id, memberId)) {
+      return jsonError("Non puoi creare una conversazione con un utente bloccato.");
+    }
   }
 
   const existingUsers = await queryAll<{ id: number }>(

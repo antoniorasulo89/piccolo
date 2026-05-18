@@ -41,7 +41,7 @@ export async function getConversations(userId: number) {
           SELECT group_concat(u.name, ', ')
           FROM conversation_members cm2
           JOIN users u ON u.id = cm2.user_id
-          WHERE cm2.conversation_id = c.id AND cm2.user_id != ?
+          WHERE cm2.conversation_id = c.id AND cm2.user_id != ? AND cm2.left_at IS NULL
         ) AS members_label,
         (
           SELECT COUNT(*)
@@ -52,7 +52,7 @@ export async function getConversations(userId: number) {
             AND (mine.last_read_at IS NULL OR m.created_at > mine.last_read_at)
         ) AS unread_count
       FROM conversations c
-      JOIN conversation_members cm ON cm.conversation_id = c.id AND cm.user_id = ?
+      JOIN conversation_members cm ON cm.conversation_id = c.id AND cm.user_id = ? AND cm.left_at IS NULL AND cm.archived_at IS NULL
       LEFT JOIN messages latest ON latest.id = (
         SELECT m2.id FROM messages m2
         WHERE m2.conversation_id = c.id
@@ -83,7 +83,7 @@ export async function getUnreadMessagesCount(userId: number) {
 
 export async function isConversationMember(conversationId: number, userId: number) {
   const row = await queryOne(
-    "SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ?",
+    "SELECT 1 FROM conversation_members WHERE conversation_id = ? AND user_id = ? AND left_at IS NULL",
     [conversationId, userId],
   );
   return Boolean(row);
@@ -103,7 +103,7 @@ export async function getConversationDetail(conversationId: number, userId: numb
       SELECT u.id, u.name, u.avatar_url, u.role
       FROM conversation_members cm
       JOIN users u ON u.id = cm.user_id
-      WHERE cm.conversation_id = ?
+      WHERE cm.conversation_id = ? AND cm.left_at IS NULL
       ORDER BY cm.created_at ASC
     `,
     [conversationId],
@@ -160,8 +160,8 @@ export async function findDirectConversation(userA: number, userB: number) {
     `
       SELECT c.id
       FROM conversations c
-      JOIN conversation_members a ON a.conversation_id = c.id AND a.user_id = ?
-      JOIN conversation_members b ON b.conversation_id = c.id AND b.user_id = ?
+      JOIN conversation_members a ON a.conversation_id = c.id AND a.user_id = ? AND a.left_at IS NULL
+      JOIN conversation_members b ON b.conversation_id = c.id AND b.user_id = ? AND b.left_at IS NULL
       WHERE c.type = 'direct'
       LIMIT 1
     `,
@@ -214,6 +214,11 @@ export async function createMessage({
   senderId: number;
   content: string;
 }) {
+  await execute(
+    "UPDATE conversation_members SET archived_at = NULL WHERE conversation_id = ? AND user_id != ? AND archived_at IS NOT NULL",
+    [conversationId, senderId],
+  );
+
   return execute(
     "INSERT INTO messages (conversation_id, sender_id, content) VALUES (?, ?, ?)",
     [conversationId, senderId, content],

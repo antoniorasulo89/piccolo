@@ -1,6 +1,7 @@
 import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlockedBy } from "@/lib/blocks";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError } from "@/lib/http";
 
@@ -50,6 +51,18 @@ export async function POST(request: Request) {
 
   if (updateResult.rowsAffected === 0) {
     return jsonError("Link di invito scaduto o esaurito.", 400);
+  }
+
+  const groupOwner = await queryOne<{ owner_id: number }>(
+    "SELECT owner_id FROM groups WHERE id = ?",
+    [groupId],
+  );
+  if (groupOwner && (await isBlockedBy(groupOwner.owner_id, user.id))) {
+    await execute(
+      "UPDATE group_invites SET used_count = MAX(used_count - 1, 0) WHERE id = ?",
+      [invite.id],
+    );
+    return jsonError("Non puoi entrare in questo gruppo.");
   }
 
   try {

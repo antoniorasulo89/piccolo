@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlocked } from "@/lib/blocks";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError } from "@/lib/http";
 import { createNotification } from "@/lib/notifications";
@@ -45,6 +46,10 @@ export async function POST(_request: Request, context: Context) {
       followingId,
     ]);
     return NextResponse.json({ following: false });
+  }
+
+  if (await isBlocked(user.id, followingId)) {
+    return jsonError("Non puoi seguire questo utente.");
   }
 
   await execute("INSERT INTO follows (follower_id, following_id) VALUES (?, ?)", [

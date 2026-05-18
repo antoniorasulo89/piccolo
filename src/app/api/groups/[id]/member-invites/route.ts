@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { recordAuditLog } from "@/lib/admin";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlockedBy } from "@/lib/blocks";
 import { execute, queryAll, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { createGroupMemberInviteNotification } from "@/lib/notifications";
@@ -79,6 +80,11 @@ export async function POST(request: Request, context: Context) {
     [groupId, data.userId],
   );
   if (alreadyMember) return jsonError("L'utente è già membro del gruppo.", 409);
+
+  const ownerRow = await queryOne<{ owner_id: number }>("SELECT owner_id FROM groups WHERE id = ?", [groupId]);
+  if (ownerRow && (await isBlockedBy(ownerRow.owner_id, data.userId))) {
+    return jsonError("L'utente non puo' entrare in questo gruppo.");
+  }
 
   const pendingInvite = await queryOne<{ id: number }>(
     "SELECT id FROM group_member_invites WHERE group_id = ? AND invited_user_id = ? AND status = 'pending'",

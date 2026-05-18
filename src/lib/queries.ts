@@ -138,19 +138,20 @@ export async function getFeedPosts(
         JOIN group_members gm ON gm.group_id = p.group_id AND gm.user_id = ? AND gm.status = 'active'
         LEFT JOIN likes l ON l.post_id = p.id
         WHERE p.group_id IS NOT NULL
+          AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)
         GROUP BY p.id
         ORDER BY p.created_at DESC
         LIMIT ? OFFSET ?
       `,
-      [userId, userId, userId, PAGE_LIMIT, offset],
+      [userId, userId, userId, userId, PAGE_LIMIT, offset],
     );
     return rows.map(mapPost);
   }
 
   const where =
     scope === "all"
-      ? "WHERE p.group_id IS NULL"
-      : "WHERE p.group_id IS NULL AND (p.user_id = ? OR f.follower_id IS NOT NULL)";
+      ? "WHERE p.group_id IS NULL AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)"
+      : "WHERE p.group_id IS NULL AND (p.user_id = ? OR f.follower_id IS NOT NULL) AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)";
   const rows = await queryAll<PostRow>(
     `
       SELECT p.id, p.content, p.created_at, p.edited_at, p.group_id, p.user_id, u.name, u.role, u.avatar_url,
@@ -174,8 +175,8 @@ export async function getFeedPosts(
       LIMIT ? OFFSET ?
     `,
     scope === "all"
-      ? [userId, userId, userId, PAGE_LIMIT, offset]
-      : [userId, userId, userId, userId, PAGE_LIMIT, offset],
+      ? [userId, userId, userId, userId, PAGE_LIMIT, offset]
+      : [userId, userId, userId, userId, userId, userId, PAGE_LIMIT, offset],
   );
 
   return rows.map(mapPost);
@@ -328,11 +329,12 @@ export async function getDiscoverUsers(viewerId: number, search = "") {
       FROM users u
       WHERE u.id != ?
         AND u.privacy_discoverable = 1
+        AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE (blocker_id = ? AND blocked_id = u.id) OR (blocker_id = u.id AND blocked_id = ?))
         AND (? = '' OR u.name LIKE ? OR (u.privacy_show_email = 1 AND u.email LIKE ?) OR u.bio LIKE ?)
       ORDER BY i_follow ASC, u.created_at DESC
       LIMIT 100 OFFSET ?
     `,
-    [viewerId, viewerId, term, pattern, pattern, pattern, offset],
+    [viewerId, viewerId, viewerId, term, pattern, pattern, pattern, offset],
   );
 
   return rows.map((user) => ({
@@ -359,10 +361,11 @@ export async function getSuggestedUsers(viewerId: number, limit = 4) {
           SELECT 1 FROM follows
           WHERE follower_id = ? AND following_id = u.id
         )
+        AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE (blocker_id = ? AND blocked_id = u.id) OR (blocker_id = u.id AND blocked_id = ?))
       ORDER BY followers_count DESC, u.created_at DESC
       LIMIT ?
     `,
-    [viewerId, viewerId, limit],
+    [viewerId, viewerId, viewerId, viewerId, limit],
   );
 
   return rows.map((user) => ({
@@ -425,11 +428,12 @@ export async function searchPosts(userId: number, search = "", page = 0) {
         JOIN users u ON u.id = p.user_id
         LEFT JOIN likes l ON l.post_id = p.id
         WHERE post_fts MATCH ? AND p.group_id IS NULL
+          AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)
         GROUP BY p.id
         ORDER BY bm25(post_fts), p.created_at DESC
         LIMIT ? OFFSET ?
       `,
-      [userId, userId, match, PAGE_LIMIT, offset],
+      [userId, userId, match, userId, PAGE_LIMIT, offset],
     );
 
     return rows.map(mapPost);
@@ -452,11 +456,12 @@ export async function searchPosts(userId: number, search = "", page = 0) {
       JOIN users u ON u.id = p.user_id
       LEFT JOIN likes l ON l.post_id = p.id
       WHERE p.group_id IS NULL AND (p.content LIKE ? OR u.name LIKE ?)
+        AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE blocker_id = ? AND blocked_id = p.user_id)
       GROUP BY p.id
       ORDER BY p.created_at DESC
       LIMIT ? OFFSET ?
     `,
-    [userId, userId, pattern, pattern, PAGE_LIMIT, offset],
+    [userId, userId, pattern, pattern, userId, PAGE_LIMIT, offset],
   );
 
   return rows.map(mapPost);

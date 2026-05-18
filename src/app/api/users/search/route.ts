@@ -31,10 +31,11 @@ export async function GET(request: Request) {
        WHERE u.id != ?
          AND u.name LIKE ?
          AND u.privacy_discoverable = 1
+         AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE (blocker_id = ? AND blocked_id = u.id) OR (blocker_id = u.id AND blocked_id = ?))
          AND u.id NOT IN (SELECT user_id FROM group_members WHERE group_id = ? AND status = 'active')
        ORDER BY u.name ASC
        LIMIT 20`,
-      [user.id, `%${q}%`, groupId],
+      [user.id, `%${q}%`, user.id, user.id, groupId],
     );
     return NextResponse.json({ users });
   }
@@ -43,9 +44,10 @@ export async function GET(request: Request) {
     `SELECT u.id, u.name, u.avatar_url
      FROM users u
      WHERE u.id != ? AND u.name LIKE ? AND u.privacy_discoverable = 1
+       AND NOT EXISTS (SELECT 1 FROM user_blocks WHERE (blocker_id = ? AND blocked_id = u.id) OR (blocker_id = u.id AND blocked_id = ?))
      ORDER BY u.name ASC
      LIMIT 20`,
-    [user.id, `%${q}%`],
+    [user.id, `%${q}%`, user.id, user.id],
   );
 
   return NextResponse.json({ users });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
-import { execute, queryAll } from "@/lib/db";
+import { isBlocked } from "@/lib/blocks";
+import { execute, queryAll, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { createMessage, isConversationMember } from "@/lib/messages";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
@@ -73,6 +74,20 @@ export async function POST(request: Request, context: Context) {
 
   if (!(await isConversationMember(conversationId, user.id))) {
     return jsonError("Non puoi scrivere in questa conversazione.", 403);
+  }
+
+  const conv = await queryOne<{ type: string }>(
+    "SELECT type FROM conversations WHERE id = ?",
+    [conversationId],
+  );
+  if (conv?.type === "direct") {
+    const other = await queryOne<{ user_id: number }>(
+      "SELECT user_id FROM conversation_members WHERE conversation_id = ? AND user_id != ?",
+      [conversationId, user.id],
+    );
+    if (other && (await isBlocked(user.id, other.user_id))) {
+      return jsonError("Non puoi inviare messaggi in questa conversazione.");
+    }
   }
 
   if (!rateLimit(rateLimitKey(request, "message", user.id), 30, 60_000)) {

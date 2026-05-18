@@ -1,3 +1,4 @@
+import { isBlockedBy } from "./blocks";
 import { execute, queryAll, queryOne } from "./db";
 import { PAGE_LIMIT, PAGE_SIZE } from "./pagination";
 
@@ -44,6 +45,8 @@ export async function createNotification({
   groupId?: number;
 }) {
   if (userId === actorId) return;
+
+  if (await isBlockedBy(userId, actorId)) return;
 
   const preferences = await queryOne<{
     notify_likes: 0 | 1;

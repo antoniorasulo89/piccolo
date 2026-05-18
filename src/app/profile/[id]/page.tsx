@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
+import { BlockButton } from "@/components/BlockButton";
 import { FollowButton } from "@/components/FollowButton";
 import { PaginationLinks } from "@/components/PaginationLinks";
 import { PostCard } from "@/components/PostCard";
@@ -8,6 +9,7 @@ import { ProfileCover } from "@/components/ProfileCover";
 import { StartDirectMessageButton } from "@/components/StartDirectMessageButton";
 import { UserAvatar } from "@/components/UserAvatar";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlockedBy } from "@/lib/blocks";
 import { hasNextPage, pageItems, parsePage } from "@/lib/pagination";
 import { getUserComments, getUserProfile } from "@/lib/queries";
 
@@ -40,6 +42,8 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
   }
 
   const isMe = profile.user.id === viewer.id;
+  const iBlocked = !isMe && (await isBlockedBy(viewer.id, profile.user.id));
+  const blockedMe = !isMe && (await isBlockedBy(profile.user.id, viewer.id));
   const comments = activeTab === "comments" ? await getUserComments(profileId, page) : [];
   const visiblePosts = pageItems(profile.posts);
   const visibleComments = pageItems(comments);
@@ -80,13 +84,26 @@ export default async function ProfilePage({ params, searchParams }: ProfilePageP
             >
               Modifica profilo
             </Link>
+          ) : blockedMe ? (
+            <span className="inline-flex h-10 items-center rounded-lg border border-charcoal/10 px-4 text-sm text-charcoal/50">
+              Non puoi interagire con questo utente
+            </span>
           ) : (
             <div className="flex flex-wrap gap-2">
-              <StartDirectMessageButton userId={profile.user.id} />
-              <FollowButton
-                userId={profile.user.id}
-                initialFollowing={profile.i_follow}
-              />
+              {!iBlocked ? (
+                <StartDirectMessageButton userId={profile.user.id} />
+              ) : null}
+              {!iBlocked ? (
+                <FollowButton
+                  userId={profile.user.id}
+                  initialFollowing={profile.i_follow}
+                />
+              ) : (
+                <span className="inline-flex h-10 items-center rounded-lg border border-charcoal/10 px-4 text-sm text-charcoal/50">
+                  Hai bloccato questo utente
+                </span>
+              )}
+              <BlockButton userId={profile.user.id} initialBlocked={iBlocked} />
             </div>
           )}
           </div>

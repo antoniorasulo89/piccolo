@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlockedBy } from "@/lib/blocks";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { z } from "zod";
@@ -39,6 +40,11 @@ export async function POST(request: Request, context: Context) {
   }
 
   if (data.accept) {
+    const ownerRow = await queryOne<{ owner_id: number }>("SELECT owner_id FROM groups WHERE id = ?", [groupId]);
+    if (ownerRow && (await isBlockedBy(ownerRow.owner_id, user.id))) {
+      return jsonError("Non puoi entrare in questo gruppo.");
+    }
+
     await execute(
       `INSERT INTO group_members (group_id, user_id, role, status)
        VALUES (?, ?, 'member', 'active')

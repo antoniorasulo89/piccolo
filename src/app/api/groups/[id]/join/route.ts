@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { isBlockedBy } from "@/lib/blocks";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError } from "@/lib/http";
 
@@ -28,6 +29,11 @@ export async function POST(_request: Request, context: Context) {
 
   if (membership?.status === "active") {
     return NextResponse.json({ status: "active" });
+  }
+
+  const ownerRow = await queryOne<{ owner_id: number }>("SELECT owner_id FROM groups WHERE id = ?", [groupId]);
+  if (ownerRow && (await isBlockedBy(ownerRow.owner_id, user.id))) {
+    return jsonError("Non puoi entrare in questo gruppo.");
   }
 
   if (group.privacy === "private") {
