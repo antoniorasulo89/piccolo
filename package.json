@@ -10,6 +10,7 @@
     "prepare": "node scripts/install-githooks.mjs",
     "lint": "eslint",
     "audit:admin": "node scripts/audit-admin-routes.mjs",
+    "audit:tracked": "node scripts/audit-tracked-routes.mjs",
     "test:e2e": "playwright test",
     "test:restore": "tsx scripts/test-backup-restore.ts",
     "secrets:scan": "gitleaks detect --no-git --redact --source ."

@@ -31,6 +31,9 @@ jobs:
       - name: Audit admin route guards
         run: npm run audit:admin
 
+      - name: Audit tracked auth routes
+        run: npm run audit:tracked
+
       - name: Lint
         run: npm run lint
 
