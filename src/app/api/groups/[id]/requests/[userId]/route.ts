@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { recordAuditLog } from "@/lib/admin";
 import { getCurrentUser } from "@/lib/auth";
 import { getGroupMembership } from "@/lib/community";
 import { execute, queryOne } from "@/lib/db";
@@ -21,9 +22,8 @@ export async function PATCH(request: Request, context: Context) {
   }
 
   const membership = await getGroupMembership(groupId, currentUser.id);
-  if (membership?.role !== "owner" && membership?.role !== "moderator") {
-    return jsonError("Permessi insufficienti.", 403);
-  }
+  const canManageRequests = membership?.role === "owner" || membership?.role === "moderator" || currentUser.role === "admin";
+  if (!canManageRequests) return jsonError("Permessi insufficienti.", 403);
 
   const requestRow = await queryOne(
     "SELECT 1 FROM group_requests WHERE group_id = ? AND user_id = ? AND status = 'pending'",
@@ -51,6 +51,14 @@ export async function PATCH(request: Request, context: Context) {
     groupId,
     targetUserId,
   ]);
+
+  await recordAuditLog({
+    adminId: currentUser.id,
+    action: approve ? "group_request_approve" : "group_request_reject",
+    targetType: "user",
+    targetId: targetUserId,
+    note: `group_id=${groupId}${currentUser.role === "admin" && (!membership || (membership.role !== "owner" && membership.role !== "moderator")) ? " admin_override=true" : ""}`,
+  });
 
   return NextResponse.json({ ok: true });
 }

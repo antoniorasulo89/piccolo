@@ -41,15 +41,18 @@ export async function PATCH(request: Request, context: Context) {
   values.push(groupId);
   await execute(`UPDATE groups SET ${set.join(", ")} WHERE id = ?`, values);
 
-  if (data.privacy) {
-    await recordAuditLog({
-      adminId: user.id,
-      action: "group_privacy_change",
-      targetType: "group",
-      targetId: groupId,
-      note: `${user.role === "admin" ? "admin_override=true " : ""}privacy=${data.privacy}`,
-    });
-  }
+  const changes: string[] = [];
+  if (data.name !== undefined) changes.push(`name`);
+  if (data.description !== undefined) changes.push(`description`);
+  if (data.privacy !== undefined) changes.push(`privacy=${data.privacy}`);
+
+  await recordAuditLog({
+    adminId: user.id,
+    action: "group_settings_update",
+    targetType: "group",
+    targetId: groupId,
+    note: `${user.role === "admin" && membership?.role !== "owner" ? "admin_override=true " : ""}changed: ${changes.join(", ")}`,
+  });
 
   const updated = await queryOne<{ name: string; description: string; privacy: string }>(
     "SELECT name, description, privacy FROM groups WHERE id = ?", [groupId],

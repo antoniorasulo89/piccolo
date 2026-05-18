@@ -129,7 +129,7 @@ export async function getGroups(viewerId: number, filter = "all", page = 0) {
   return rows.map(mapGroup);
 }
 
-export async function getGroupBySlug(slug: string, viewerId: number, page = 0) {
+export async function getGroupBySlug(slug: string, viewerId: number, page = 0, viewerIsAdmin = false) {
   const group = await queryOne<GroupRow>(
     `
       SELECT g.id, g.owner_id, g.name, g.slug, g.description, g.privacy, g.cover_url, g.created_at,
@@ -148,7 +148,7 @@ export async function getGroupBySlug(slug: string, viewerId: number, page = 0) {
 
   if (!group) return null;
   const mapped = mapGroup(group);
-  if (mapped.privacy === "private" && !mapped.is_member) {
+  if (mapped.privacy === "private" && !mapped.is_member && !viewerIsAdmin) {
     return { group: mapped, posts: [], requests: [] as GroupRequest[] };
   }
 

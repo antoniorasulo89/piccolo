@@ -1,6 +1,7 @@
 import { randomBytes, createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { z } from "zod";
+import { recordAuditLog } from "@/lib/admin";
 import { getCurrentUser } from "@/lib/auth";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
@@ -51,6 +52,14 @@ export async function POST(request: Request, context: Context) {
     [groupId, tokenHash(token), user.id, data.max_uses ?? null, expiresAt],
   );
 
+  await recordAuditLog({
+    adminId: user.id,
+    action: "group_invite_create",
+    targetType: "group",
+    targetId: groupId,
+    note: `${user.role === "admin" && !membership ? "admin_override=true " : ""}max_uses=${data.max_uses ?? "unlimited"} expires_in_hours=${data.expires_in_hours ?? "never"}`,
+  });
+
   const inviteUrl = new URL(`/groups/join`, request.url);
   inviteUrl.searchParams.set("token", token);
 
@@ -84,6 +93,14 @@ export async function DELETE(request: Request, context: Context) {
     "DELETE FROM group_invites WHERE group_id = ? AND token_hash = ?",
     [groupId, tokenHash(token)],
   );
+
+  await recordAuditLog({
+    adminId: user.id,
+    action: "group_invite_revoke",
+    targetType: "group",
+    targetId: groupId,
+    note: user.role === "admin" && !membership ? "admin_override=true" : "",
+  });
 
   return NextResponse.json({ revoked: true });
 }

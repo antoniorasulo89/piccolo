@@ -3,7 +3,7 @@
 import { ShieldCheck, Trash } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useTransition } from "react";
+import { useState, useTransition } from "react";
 import { showToast } from "@/components/ToastProvider";
 import { UserAvatar } from "@/components/UserAvatar";
 
@@ -18,12 +18,14 @@ type Member = {
 type GroupMembersProps = {
   members: Member[];
   groupId: number;
-  canManage: boolean;
+  canExpel: boolean;
+  canChangeRoles: boolean;
 };
 
-export function GroupMembers({ members, groupId, canManage }: GroupMembersProps) {
+export function GroupMembers({ members, groupId, canExpel, canChangeRoles }: GroupMembersProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
+  const [confirmExpel, setConfirmExpel] = useState<number | null>(null);
 
   function expel(userId: number) {
     startTransition(async () => {
@@ -33,6 +35,7 @@ export function GroupMembers({ members, groupId, canManage }: GroupMembersProps)
         showToast(data.error ?? "Impossibile espellere il membro.", "error");
         return;
       }
+      setConfirmExpel(null);
       showToast("Membro espulso.");
       router.refresh();
     });
@@ -60,7 +63,10 @@ export function GroupMembers({ members, groupId, canManage }: GroupMembersProps)
       {members.map((member) => {
         const isOwner = member.role === "owner";
         const isModerator = member.role === "moderator";
-        const showRoleActions = canManage && !isOwner;
+        const showExpel = canExpel && !isOwner && confirmExpel !== member.user_id;
+        const showPromote = canChangeRoles && !isOwner && !isModerator;
+        const showDemote = canChangeRoles && !isOwner && isModerator;
+        const confirming = confirmExpel === member.user_id;
 
         return (
           <div
@@ -81,9 +87,29 @@ export function GroupMembers({ members, groupId, canManage }: GroupMembersProps)
               </div>
             </div>
 
-            {showRoleActions ? (
+            {confirming ? (
+              <div className="flex items-center gap-2">
+                <span className="text-xs text-rose-900">Confermi espulsione?</span>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => expel(member.user_id)}
+                  className="rounded-lg bg-rose-900 px-3 py-1 text-xs font-semibold text-paper transition hover:bg-rose-800 active:scale-[0.98] disabled:opacity-50"
+                >
+                  Espelli
+                </button>
+                <button
+                  type="button"
+                  disabled={pending}
+                  onClick={() => setConfirmExpel(null)}
+                  className="rounded-lg border border-charcoal/10 px-2 py-1 text-xs font-medium text-charcoal/50 transition hover:text-charcoal disabled:opacity-50"
+                >
+                  Annulla
+                </button>
+              </div>
+            ) : (
               <div className="flex gap-2">
-                {isModerator ? (
+                {showDemote ? (
                   <button
                     type="button"
                     disabled={pending}
@@ -92,7 +118,8 @@ export function GroupMembers({ members, groupId, canManage }: GroupMembersProps)
                   >
                     Declassa
                   </button>
-                ) : (
+                ) : null}
+                {showPromote ? (
                   <button
                     type="button"
                     disabled={pending}
@@ -102,20 +129,20 @@ export function GroupMembers({ members, groupId, canManage }: GroupMembersProps)
                     <ShieldCheck size={14} weight="bold" className="inline mr-1" />
                     Promuovi
                   </button>
-                )}
-                <button
-                  type="button"
-                  disabled={pending}
-                  onClick={() => expel(member.user_id)}
-                  className="rounded-lg px-2 py-1 text-xs font-medium text-rose-900/70 transition hover:bg-rose-100 hover:text-rose-900 disabled:opacity-50"
-                >
-                  <Trash size={14} weight="bold" className="inline mr-1" />
-                  Espelli
-                </button>
+                ) : null}
+                {showExpel ? (
+                  <button
+                    type="button"
+                    disabled={pending}
+                    onClick={() => setConfirmExpel(member.user_id)}
+                    className="rounded-lg px-2 py-1 text-xs font-medium text-rose-900/70 transition hover:bg-rose-100 hover:text-rose-900 disabled:opacity-50"
+                  >
+                    <Trash size={14} weight="bold" className="inline mr-1" />
+                    Espelli
+                  </button>
+                ) : null}
               </div>
-            ) : isOwner ? (
-              <span className="rounded-lg bg-clay-100 px-2 py-1 text-xs font-medium text-clay-900">Owner</span>
-            ) : null}
+            )}
           </div>
         );
       })}

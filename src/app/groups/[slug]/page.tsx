@@ -35,7 +35,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
   const { page: rawPage, tab: rawTab } = await searchParams;
   const page = parsePage(rawPage);
   const activeTab = rawTab && tabs.some((t) => t.key === rawTab) ? rawTab : "posts";
-  const detail = await getGroupBySlug(slug, user.id, page);
+  const detail = await getGroupBySlug(slug, user.id, page, user.role === "admin");
 
   if (!detail) notFound();
 
@@ -46,6 +46,8 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
   const isModerator = group.viewer_role === "moderator";
   const canModerate = isOwner || isModerator || user.role === "admin";
   const locked = group.privacy === "private" && !group.is_member && user.role !== "admin";
+  const canExpel = isOwner || isModerator || user.role === "admin";
+  const canChangeRoles = isOwner || user.role === "admin";
 
   const members = activeTab === "members" || activeTab === "invites"
     ? await getGroupMembers(group.id)
@@ -173,7 +175,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">Membri ({members.length})</h2>
               <div className="mt-4">
-                <GroupMembers members={members} groupId={group.id} canManage={canModerate} />
+                <GroupMembers members={members} groupId={group.id} canExpel={canExpel} canChangeRoles={canChangeRoles} />
               </div>
             </div>
           ) : null}

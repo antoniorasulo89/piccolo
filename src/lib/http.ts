@@ -10,8 +10,9 @@ export async function readJson(request: Request) {
     const text = await request.text();
     if (!text.trim()) return {};
     return JSON.parse(text);
-  } catch {
-    return {};
+  } catch (err) {
+    if (err instanceof SyntaxError) return err;
+    return null;
   }
 }
 
@@ -24,6 +25,9 @@ export async function parseJson<T>(
   schema: ZodSchema<T>,
 ): Promise<ParseJsonResult<T>> {
   const body = await readJson(request);
+  if (body instanceof SyntaxError) {
+    return { data: null, response: jsonError("JSON non valido.") };
+  }
   const parsed = schema.safeParse(body);
 
   if (!parsed.success) {
