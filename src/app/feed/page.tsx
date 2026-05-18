@@ -71,10 +71,10 @@ export default async function FeedPage({ searchParams }: FeedPageProps) {
                     : "Non ci sono ancora post pubblici. Appena qualcuno scrive, lo vedrai qui."}
               </p>
               <Link
-                href="/explore"
+                href={scope === "groups" ? "/groups" : "/explore"}
                 className="mt-6 inline-flex h-10 items-center rounded-lg bg-fern-700 px-4 text-sm font-semibold text-paper transition hover:bg-fern-900 active:translate-y-px"
               >
-                Trova utenti
+                {scope === "groups" ? "Apri gruppi" : "Trova utenti"}
               </Link>
             </div>
           )}

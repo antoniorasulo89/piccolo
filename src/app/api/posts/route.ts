@@ -16,7 +16,11 @@ export async function GET(request: Request) {
 
   const url = new URL(request.url);
   const page = Math.max(Number(url.searchParams.get("page") ?? 0), 0);
-  const scope = url.searchParams.get("scope") === "all" ? "all" : "following";
+  const rawScope = url.searchParams.get("scope");
+  const scope =
+    rawScope === "all" ? "all" :
+    rawScope === "groups" ? "groups" :
+    "following";
 
   const posts = await getFeedPosts(user.id, page, scope);
   return NextResponse.json(pageItems(posts), {
