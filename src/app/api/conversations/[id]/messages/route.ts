@@ -36,7 +36,7 @@ export async function GET(request: Request, context: Context) {
     [conversationId, since],
   );
 
-  markRead(conversationId, user.id).catch(() => {});
+  await markRead(conversationId, user.id);
 
   return NextResponse.json(
     rows.map((r) => {

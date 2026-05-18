@@ -1,22 +1,25 @@
 "use client";
 
 import { Eye, EyeSlash, Trash } from "@phosphor-icons/react";
-import { useState, useTransition } from "react";
+import { useTransition } from "react";
 import { showToast } from "@/components/ToastProvider";
 
-export function NotificationActions({ id, isRead }: { id: number; isRead: boolean }) {
-  const [read, setRead] = useState(isRead);
-  const [deleted, setDeleted] = useState(false);
-  const [pending, startTransition] = useTransition();
+type NotificationActionsProps = {
+  id: number;
+  isRead: boolean;
+  onDeleted: () => void;
+  onRead: (read: boolean) => void;
+};
 
-  if (deleted) return null;
+export function NotificationActions({ id, isRead, onDeleted, onRead }: NotificationActionsProps) {
+  const [pending, startTransition] = useTransition();
 
   function toggleRead() {
     startTransition(async () => {
       const res = await fetch(`/api/notifications/${id}`, { method: "PATCH" });
       if (!res.ok) return;
       const data = await res.json();
-      setRead(data.read);
+      onRead(data.read);
       window.dispatchEvent(new CustomEvent("piccolo:refresh-counts"));
     });
   }
@@ -28,7 +31,7 @@ export function NotificationActions({ id, isRead }: { id: number; isRead: boolea
         showToast("Impossibile rimuovere la notifica.", "error");
         return;
       }
-      setDeleted(true);
+      onDeleted();
       window.dispatchEvent(new CustomEvent("piccolo:refresh-counts"));
     });
   }
@@ -40,9 +43,9 @@ export function NotificationActions({ id, isRead }: { id: number; isRead: boolea
         onClick={toggleRead}
         disabled={pending}
         className="rounded-lg p-1.5 text-xs text-charcoal/40 transition hover:bg-charcoal/5 hover:text-charcoal/70 disabled:opacity-50"
-        title={read ? "Segna non letta" : "Segna letta"}
+        title={isRead ? "Segna non letta" : "Segna letta"}
       >
-        {read ? <EyeSlash size={14} /> : <Eye size={14} />}
+        {isRead ? <EyeSlash size={14} /> : <Eye size={14} />}
       </button>
       <button
         type="button"
