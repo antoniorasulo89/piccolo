@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { MessageComposer } from "@/components/MessageComposer";
+import { MessageList } from "@/components/MessageList";
 import { RefreshCountsOnMount } from "@/components/RefreshCountsOnMount";
 import { UserAvatar } from "@/components/UserAvatar";
 import { getCurrentUser } from "@/lib/auth";
@@ -9,15 +10,6 @@ import { getConversationDetail } from "@/lib/messages";
 type MessagePageProps = {
   params: Promise<{ id: string }>;
 };
-
-function formatDate(value: string) {
-  return new Intl.DateTimeFormat("it-IT", {
-    day: "2-digit",
-    month: "short",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(new Date(value));
-}
 
 export default async function MessagePage({ params }: MessagePageProps) {
   const user = await getCurrentUser();
@@ -64,43 +56,12 @@ export default async function MessagePage({ params }: MessagePageProps) {
           </div>
         </div>
 
-        <div className="mt-5 grid gap-3">
-          {detail.messages.length ? (
-            detail.messages.map((message) => {
-              const mine = message.sender.id === user.id;
-              return (
-                <article
-                  key={message.id}
-                  className={`flex gap-3 ${mine ? "justify-end" : "justify-start"}`}
-                >
-                  {!mine ? (
-                    <Link href={`/profile/${message.sender.id}`} className="mt-1 shrink-0">
-                      <UserAvatar user={message.sender} size="sm" />
-                    </Link>
-                  ) : null}
-                  <div
-                    className={`max-w-[min(38rem,85%)] rounded-lg px-4 py-3 ${
-                      mine
-                        ? "bg-charcoal text-paper shadow-[inset_0_3px_0_var(--clay)]"
-                        : "border border-charcoal/10 bg-paper text-charcoal"
-                    }`}
-                  >
-                    <p className={`text-xs font-semibold ${mine ? "text-paper/72" : "text-charcoal/45"}`}>
-                      {message.sender.name} / {formatDate(message.created_at)}
-                    </p>
-                    <p className="mt-1 whitespace-pre-wrap leading-7">{message.content}</p>
-                  </div>
-                </article>
-              );
-            })
-          ) : (
-            <div className="rounded-lg border border-dashed border-charcoal/16 bg-paper/64 p-8">
-              <h2 className="text-xl font-semibold tracking-tight text-charcoal">
-                Nessun messaggio ancora.
-              </h2>
-              <p className="mt-2 text-charcoal/58">Scrivi il primo messaggio qui sotto.</p>
-            </div>
-          )}
+        <div className="mt-5">
+          <MessageList
+            initial={detail.messages}
+            conversationId={conversationId}
+            currentUserId={user.id}
+          />
         </div>
 
         <div className="mt-6 border-t border-charcoal/10 pt-4">

@@ -2,8 +2,8 @@
 
 import { BookmarkSimple, MagnifyingGlass } from "@phosphor-icons/react";
 import Link from "next/link";
-import { useEffect, useState } from "react";
 import type { PublicUser } from "@/lib/db";
+import { useUnreadCounts } from "@/lib/useUnreadCounts";
 import { NotificationBell } from "./NotificationBell";
 import { UserMenu } from "./UserMenu";
 
@@ -14,43 +14,13 @@ type UnreadData = {
   openReports: number;
 };
 
-function useUnreadCounts(initial: UnreadData) {
-  const [counts, setCounts] = useState(initial);
-
-  useEffect(() => {
-    const fetchCounts = async () => {
-      try {
-        const res = await fetch("/api/me/unread");
-        if (res.ok) {
-          const data = await res.json();
-          setCounts(data);
-        }
-      } catch {
-        // ignore polling errors
-      }
-    };
-
-    const onRefresh = () => fetchCounts();
-    window.addEventListener("piccolo:refresh-counts", onRefresh);
-
-    const interval = setInterval(fetchCounts, 30000);
-
-    return () => {
-      clearInterval(interval);
-      window.removeEventListener("piccolo:refresh-counts", onRefresh);
-    };
-  }, []);
-
-  return counts;
-}
-
 type NavbarActionsProps = {
   user: PublicUser;
   initial: UnreadData;
 };
 
 export function NavbarActions({ user, initial }: NavbarActionsProps) {
-  const counts = useUnreadCounts(initial);
+  const { counts } = useUnreadCounts(initial);
 
   return (
     <div className="flex items-center gap-2 sm:gap-4">

@@ -2,6 +2,8 @@ import Link from "next/link";
 import { redirect } from "next/navigation";
 import { ChatCircleText, Heart, UserPlus } from "@phosphor-icons/react/dist/ssr";
 import { MarkNotificationsReadButton } from "@/components/MarkNotificationsReadButton";
+import { MarkNotificationsSeenOnMount } from "@/components/MarkNotificationsSeenOnMount";
+import { NotificationActions } from "@/components/NotificationActions";
 import { NotificationPreferencesForm } from "@/components/NotificationPreferencesForm";
 import { PaginationLinks } from "@/components/PaginationLinks";
 import { ProfileBadges } from "@/components/ProfileBadges";
@@ -58,6 +60,7 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
 
   return (
     <main className="mx-auto max-w-3xl px-4 pb-28 pt-8 sm:px-6 lg:px-8">
+      <MarkNotificationsSeenOnMount />
       <section className="mb-6 flex flex-wrap items-end justify-between gap-4">
         <div>
           <p className="font-mono text-xs font-semibold uppercase tracking-[0.2em] text-fern-900">
@@ -101,34 +104,38 @@ export default async function NotificationsPage({ searchParams }: NotificationsP
               : `/profile/${notification.actor.id}`;
 
             return (
-              <Link
+              <div
                 key={notification.id}
-                href={href}
-                className={`grid gap-3 border-b border-charcoal/10 p-4 transition last:border-b-0 hover:bg-paper sm:grid-cols-[auto_1fr_auto] sm:items-start ${
+                className={`grid gap-3 border-b border-charcoal/10 p-4 transition last:border-b-0 sm:grid-cols-[auto_1fr_auto] sm:items-start ${
                   notification.read_at ? "" : "bg-fern-100/45"
                 }`}
               >
-                <div className="flex items-start gap-3">
-                  <UserAvatar user={notification.actor} size="sm" />
-                  <span className="grid h-8 w-8 place-items-center rounded-lg bg-paper">
-                    <NotificationIcon type={notification.type} />
-                  </span>
-                </div>
-                <div className="min-w-0">
-                  <p className="leading-6 text-charcoal/78">
-                    <span className="font-semibold text-charcoal">
-                      {notification.actor.name}
-                    </span>{" "}
-                    {notificationCopy(notification.type)}
-                  </p>
-                  <div className="mt-2">
-                    <ProfileBadges role={notification.actor.role} />
+                <Link href={href} className="contents">
+                  <div className="flex items-start gap-3">
+                    <UserAvatar user={notification.actor} size="sm" />
+                    <span className="grid h-8 w-8 place-items-center rounded-lg bg-paper">
+                      <NotificationIcon type={notification.type} />
+                    </span>
                   </div>
+                  <div className="min-w-0">
+                    <p className="leading-6 text-charcoal/78">
+                      <span className="font-semibold text-charcoal">
+                        {notification.actor.name}
+                      </span>{" "}
+                      {notificationCopy(notification.type)}
+                    </p>
+                    <div className="mt-2">
+                      <ProfileBadges role={notification.actor.role} />
+                    </div>
+                  </div>
+                  <p className="font-mono text-xs text-charcoal/42">
+                    {relativeTime(notification.created_at)}
+                  </p>
+                </Link>
+                <div className="flex items-start justify-end sm:col-span-3 sm:justify-end">
+                  <NotificationActions id={notification.id} isRead={Boolean(notification.read_at)} />
                 </div>
-                <p className="font-mono text-xs text-charcoal/42">
-                  {relativeTime(notification.created_at)}
-                </p>
-              </Link>
+              </div>
             );
           })
         ) : (

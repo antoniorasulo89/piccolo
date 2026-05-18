@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
+import { queryAll } from "@/lib/db";
 import { jsonError, parseJson } from "@/lib/http";
 import { createMessage, isConversationMember } from "@/lib/messages";
 import { rateLimit, rateLimitKey } from "@/lib/rate-limit";
@@ -8,6 +9,50 @@ import { messageSchema } from "@/lib/schemas";
 type Context = {
   params: Promise<{ id: string }>;
 };
+
+export async function GET(request: Request, context: Context) {
+  const user = await getCurrentUser();
+  if (!user) return jsonError("Non autenticato.", 401);
+
+  const { id } = await context.params;
+  const conversationId = Number(id);
+  if (!Number.isInteger(conversationId)) return jsonError("Conversazione non valida.");
+
+  if (!(await isConversationMember(conversationId, user.id))) {
+    return jsonError("Non sei membro di questa conversazione.", 403);
+  }
+
+  const url = new URL(request.url);
+  const since = Math.max(Number(url.searchParams.get("since") ?? 0), 0);
+
+  const rows = await queryAll(
+    `SELECT m.id, m.content, m.created_at,
+      u.id AS sender_id, u.name AS sender_name, u.avatar_url AS sender_avatar_url, u.role AS sender_role
+     FROM messages m
+     JOIN users u ON u.id = m.sender_id
+     WHERE m.conversation_id = ? AND m.id > ?
+     ORDER BY m.id ASC
+     LIMIT 50`,
+    [conversationId, since],
+  );
+
+  return NextResponse.json(
+    rows.map((r) => {
+      const row = r as Record<string, unknown>;
+      return {
+        id: row.id,
+        content: row.content,
+        created_at: row.created_at,
+        sender: {
+          id: row.sender_id,
+          name: row.sender_name,
+          avatar_url: row.sender_avatar_url,
+          role: row.sender_role,
+        },
+      };
+    }),
+  );
+}
 
 export async function POST(request: Request, context: Context) {
   const user = await getCurrentUser();
