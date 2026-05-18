@@ -176,7 +176,7 @@ export async function getFeedPosts(
     `,
     scope === "all"
       ? [userId, userId, userId, userId, PAGE_LIMIT, offset]
-      : [userId, userId, userId, userId, userId, userId, PAGE_LIMIT, offset],
+      : [userId, userId, userId, userId, userId, PAGE_LIMIT, offset],
   );
 
   return rows.map(mapPost);

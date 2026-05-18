@@ -78,7 +78,7 @@ export async function getUnreadMessagesCount(userId: number) {
     `
       SELECT COUNT(*) AS count
       FROM messages m
-      JOIN conversation_members cm ON cm.conversation_id = m.conversation_id AND cm.user_id = ?
+      JOIN conversation_members cm ON cm.conversation_id = m.conversation_id AND cm.user_id = ? AND cm.left_at IS NULL AND cm.archived_at IS NULL
       WHERE m.sender_id != ?
         AND (cm.last_read_at IS NULL OR m.created_at > cm.last_read_at)
     `,
