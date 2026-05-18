@@ -3,6 +3,7 @@ import { ArrowLeft, ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import { redirect } from "next/navigation";
 import { AdminAudit } from "@/components/admin/AdminAudit";
 import { AdminContent } from "@/components/admin/AdminContent";
+import { AdminGroups } from "@/components/admin/AdminGroups";
 import { AdminReports } from "@/components/admin/AdminReports";
 import { AdminStats } from "@/components/admin/AdminStats";
 import { AdminUsers } from "@/components/admin/AdminUsers";
@@ -85,6 +86,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
               <a href="#segnalazioni" className="rounded-lg border border-paper/10 px-3 py-2 text-sm font-semibold text-paper/72 transition hover:bg-paper/8 hover:text-paper">Segnalazioni</a>
               <a href="#contenuti" className="rounded-lg border border-paper/10 px-3 py-2 text-sm font-semibold text-paper/72 transition hover:bg-paper/8 hover:text-paper">Contenuti</a>
               <a href="#audit" className="rounded-lg border border-paper/10 px-3 py-2 text-sm font-semibold text-paper/72 transition hover:bg-paper/8 hover:text-paper">Audit</a>
+              <a href="#gruppi" className="rounded-lg border border-paper/10 px-3 py-2 text-sm font-semibold text-paper/72 transition hover:bg-paper/8 hover:text-paper sm:col-span-2">Gruppi</a>
             </div>
           </div>
         </div>
@@ -95,6 +97,13 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
       <section className="grid gap-10 py-8 lg:grid-cols-[minmax(0,1fr)_minmax(360px,0.72fr)]">
         <div>
           <AdminUsers users={users} page={usersPage} currentUserId={currentUser.id} paginationParams={paginationParams} />
+
+          <section id="gruppi" className="mt-8">
+            <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Gruppi</h2>
+            <p className="mt-1 text-sm text-charcoal/50">Tutti i gruppi della piattaforma, pubblici e privati.</p>
+            <AdminGroups />
+          </section>
+
           <AdminContent comments={comments} posts={posts} commentsPage={commentsPage} postsPage={postsPage} paginationParams={paginationParams} />
           <AdminAudit auditLogs={auditLogs} page={auditPage} paginationParams={paginationParams} />
         </div>

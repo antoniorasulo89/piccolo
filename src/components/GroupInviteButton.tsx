@@ -11,7 +11,11 @@ export function GroupInviteButton({ groupId }: { groupId: number }) {
   async function createInvite() {
     setPending(true);
     try {
-      const res = await fetch(`/api/groups/${groupId}/invites`, { method: "POST" });
+      const res = await fetch(`/api/groups/${groupId}/invites`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({}),
+      });
       if (!res.ok) {
         const data = await res.json();
         showToast(data.error ?? "Invito non creato.", "error");

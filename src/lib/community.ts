@@ -252,3 +252,20 @@ export async function getPendingGroupRequestsCount(userId: number) {
   );
   return row?.count ?? 0;
 }
+
+export async function getGroupMembers(groupId: number) {
+  return queryAll<{
+    user_id: number;
+    name: string;
+    avatar_url: string | null;
+    role: "owner" | "moderator" | "member";
+    joined_at: string;
+  }>(
+    `SELECT u.id AS user_id, u.name, u.avatar_url, gm.role, gm.created_at AS joined_at
+     FROM group_members gm
+     JOIN users u ON u.id = gm.user_id
+     WHERE gm.group_id = ? AND gm.status = 'active'
+     ORDER BY CASE gm.role WHEN 'owner' THEN 1 WHEN 'moderator' THEN 2 ELSE 3 END, gm.created_at ASC`,
+    [groupId],
+  );
+}

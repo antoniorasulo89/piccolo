@@ -7,9 +7,11 @@ export function jsonError(message: string, status = 400) {
 
 export async function readJson(request: Request) {
   try {
-    return await request.json();
+    const text = await request.text();
+    if (!text.trim()) return {};
+    return JSON.parse(text);
   } catch {
-    return null;
+    return {};
   }
 }
 

@@ -35,7 +35,8 @@ export async function POST(request: Request, context: Context) {
     "SELECT role FROM group_members WHERE group_id = ? AND user_id = ? AND status = 'active'",
     [groupId, user.id],
   );
-  if (!membership || (membership.role !== "owner" && membership.role !== "moderator")) {
+  if (!membership && user.role !== "admin") return jsonError("Non sei membro del gruppo.", 403);
+  if (membership && membership.role !== "owner" && membership.role !== "moderator" && user.role !== "admin") {
     return jsonError("Solo owner e moderator possono creare inviti.", 403);
   }
 
@@ -71,7 +72,8 @@ export async function DELETE(request: Request, context: Context) {
     "SELECT role FROM group_members WHERE group_id = ? AND user_id = ? AND status = 'active'",
     [groupId, user.id],
   );
-  if (!membership || (membership.role !== "owner" && membership.role !== "moderator")) {
+  if (!membership && user.role !== "admin") return jsonError("Non sei membro del gruppo.", 403);
+  if (membership && membership.role !== "owner" && membership.role !== "moderator" && user.role !== "admin") {
     return jsonError("Solo owner e moderator possono revocare inviti.", 403);
   }
 
