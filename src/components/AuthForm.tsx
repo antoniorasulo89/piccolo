@@ -4,6 +4,7 @@ import { ArrowRight } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useState, useTransition } from "react";
+import { safeRedirectPath } from "@/lib/redirect";
 
 type AuthFormProps = {
   mode: "login" | "register";
@@ -12,7 +13,7 @@ type AuthFormProps = {
 export function AuthForm({ mode }: AuthFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const redirectTo = searchParams.get("redirect");
+  const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const [error, setError] = useState("");
   const [pending, startTransition] = useTransition();
   const isRegister = mode === "register";

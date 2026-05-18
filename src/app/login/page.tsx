@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { redirect } from "next/navigation";
 import { AuthForm } from "@/components/AuthForm";
 import { getCurrentUser } from "@/lib/auth";
+import { safeRedirectPath } from "@/lib/redirect";
 
 type LoginPageProps = {
   searchParams: Promise<{ redirect?: string }>;
@@ -9,7 +10,8 @@ type LoginPageProps = {
 
 export default async function LoginPage({ searchParams }: LoginPageProps) {
   const user = await getCurrentUser();
-  const { redirect: redirectTo } = await searchParams;
+  const { redirect: rawRedirect } = await searchParams;
+  const redirectTo = safeRedirectPath(rawRedirect);
 
   if (user) {
     redirect(redirectTo ?? "/feed");
