@@ -1,4 +1,6 @@
 import Link from "next/link";
+import { AdminApproveUserButton } from "@/components/AdminApproveUserButton";
+import { AdminDeleteUserButton } from "@/components/AdminDeleteUserButton";
 import { AdminPasswordResetButton } from "@/components/AdminPasswordResetButton";
 import { AdminRoleButton } from "@/components/AdminRoleButton";
 import { AdminSuspendButton } from "@/components/AdminSuspendButton";
@@ -23,7 +25,7 @@ export function AdminUsers({ users, page, currentUserId, basePath, pageParam }: 
       <div className="mb-4 flex items-end justify-between gap-3">
         <div>
           <h2 className="text-2xl font-semibold tracking-tight text-charcoal">Utenti</h2>
-          <p className="mt-1 text-sm text-charcoal/50">Promuovi collaboratori fidati o rimuovi privilegi.</p>
+          <p className="mt-1 text-sm text-charcoal/50">Approva nuovi iscritti, gestisci ruoli o rimuovi account non validi.</p>
         </div>
       </div>
 
@@ -47,6 +49,11 @@ export function AdminUsers({ users, page, currentUserId, basePath, pageParam }: 
                       Sospeso
                     </span>
                   ) : null}
+                  {!user.approved_at && user.role !== "admin" ? (
+                    <span className="rounded-md bg-clay-100 px-2 py-1 font-mono text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-clay-900">
+                      In attesa
+                    </span>
+                  ) : null}
                 </div>
                 <p className="mt-1 break-all text-sm text-charcoal/50">{user.email}</p>
                 <p className="mt-2 text-sm text-charcoal/45">
@@ -55,9 +62,11 @@ export function AdminUsers({ users, page, currentUserId, basePath, pageParam }: 
               </div>
 
               <div className="flex flex-wrap gap-2 sm:justify-end">
+                <AdminApproveUserButton userId={user.id} approved={Boolean(user.approved_at) || user.role === "admin"} />
                 <AdminRoleButton userId={user.id} role={user.role} isCurrentUser={user.id === currentUserId} />
                 <AdminSuspendButton userId={user.id} suspended={Boolean(user.suspended_at)} isCurrentUser={user.id === currentUserId} />
                 <AdminPasswordResetButton userId={user.id} />
+                <AdminDeleteUserButton userId={user.id} userName={user.name} isCurrentUser={user.id === currentUserId} />
               </div>
             </div>
           ))

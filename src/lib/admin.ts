@@ -4,6 +4,7 @@ import { PAGE_LIMIT, PAGE_SIZE } from "./pagination";
 export type AdminStats = {
   users: number;
   admins: number;
+  pending_users: number;
   suspended: number;
   posts: number;
   comments: number;
@@ -22,6 +23,7 @@ export type AdminUser = {
   email: string;
   role: "admin" | "user";
   suspended_at: string | null;
+  approved_at: string | null;
   created_at: string;
   posts_count: number;
   followers_count: number;
@@ -80,6 +82,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       SELECT
         (SELECT COUNT(*) FROM users) AS users,
         (SELECT COUNT(*) FROM users WHERE role = 'admin') AS admins,
+        (SELECT COUNT(*) FROM users WHERE role != 'admin' AND approved_at IS NULL) AS pending_users,
         (SELECT COUNT(*) FROM users WHERE suspended_at IS NOT NULL) AS suspended,
         (SELECT COUNT(*) FROM posts) AS posts,
         (SELECT COUNT(*) FROM comments) AS comments,
@@ -95,6 +98,7 @@ export async function getAdminStats(): Promise<AdminStats> {
       users: 0,
       admins: 0,
       suspended: 0,
+      pending_users: 0,
       posts: 0,
       comments: 0,
       likes: 0,
@@ -113,7 +117,7 @@ export async function getAdminUsers(page = 0) {
 
   return queryAll<AdminUser>(
     `
-      SELECT u.id, u.name, u.email, u.role, u.suspended_at, u.created_at,
+      SELECT u.id, u.name, u.email, u.role, u.suspended_at, u.approved_at, u.created_at,
         COUNT(DISTINCT p.id) AS posts_count,
         COUNT(DISTINCT f.follower_id) AS followers_count
       FROM users u
@@ -185,6 +189,13 @@ export async function setUserSuspension(userId: number, suspended: boolean) {
   return execute(
     "UPDATE users SET suspended_at = CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE NULL END WHERE id = ?",
     [suspended ? 1 : 0, userId],
+  );
+}
+
+export async function approveUser(userId: number, adminId: number) {
+  return execute(
+    "UPDATE users SET approved_at = COALESCE(approved_at, CURRENT_TIMESTAMP), approved_by = COALESCE(approved_by, ?) WHERE id = ?",
+    [adminId, userId],
   );
 }
 

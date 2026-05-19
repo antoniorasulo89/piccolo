@@ -75,11 +75,12 @@ export const getCurrentUser = cache(async (): Promise<PublicUser | null> => {
   if (!session) return null;
 
   const user = await queryOne<PublicUser>(
-    "SELECT id, name, email, role, bio, avatar_url, cover_url, onboarded_at, suspended_at, privacy_show_email, privacy_discoverable, theme_preference, notify_likes, notify_comments, notify_follows, notify_group_posts, created_at, created_at >= datetime('now', '-7 days') AS is_new FROM users WHERE id = ?",
+    "SELECT id, name, email, role, bio, avatar_url, cover_url, onboarded_at, suspended_at, approved_at, approved_by, privacy_show_email, privacy_discoverable, theme_preference, notify_likes, notify_comments, notify_follows, notify_group_posts, created_at, created_at >= datetime('now', '-7 days') AS is_new FROM users WHERE id = ?",
     [session.id],
   );
 
   if (user?.suspended_at) return null;
+  if (user && user.role !== "admin" && !user.approved_at) return null;
 
   return user ?? null;
 });

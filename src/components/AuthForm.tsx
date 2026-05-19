@@ -15,14 +15,17 @@ export function AuthForm({ mode }: AuthFormProps) {
   const searchParams = useSearchParams();
   const redirectTo = safeRedirectPath(searchParams.get("redirect"));
   const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
   const [pending, startTransition] = useTransition();
   const isRegister = mode === "register";
 
   function submit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     setError("");
+    setSuccess("");
 
-    const data = new FormData(event.currentTarget);
+    const form = event.currentTarget;
+    const data = new FormData(form);
     const payload = Object.fromEntries(data);
 
     startTransition(async () => {
@@ -40,6 +43,11 @@ export function AuthForm({ mode }: AuthFormProps) {
 
       const body = await response.json();
       if (isRegister) {
+        if (body.pendingApproval) {
+          setSuccess("Account creato. Un amministratore deve approvarlo prima dell'accesso.");
+          form.reset();
+          return;
+        }
         router.push("/login");
       } else if (redirectTo) {
         router.push(redirectTo);
@@ -101,6 +109,11 @@ export function AuthForm({ mode }: AuthFormProps) {
       {error ? (
         <p className="rounded-lg border border-rose-900/15 bg-rose-100 px-3 py-2 text-sm text-rose-900">
           {error}
+        </p>
+      ) : null}
+      {success ? (
+        <p className="rounded-lg border border-fern-700/15 bg-fern-100 px-3 py-2 text-sm text-fern-900">
+          {success}
         </p>
       ) : null}
 

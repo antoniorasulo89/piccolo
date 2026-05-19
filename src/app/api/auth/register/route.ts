@@ -26,17 +26,20 @@ export async function POST(request: Request) {
     "SELECT COUNT(*) AS count FROM users",
   );
   const role = userCount?.count === 0 || isEmailAdmin(email) ? "admin" : "user";
+  const approved = role === "admin" || (isTestAccount(email, name) && allowTestAccounts());
 
   try {
     const result = await execute(
-      "INSERT INTO users (name, email, password_hash, role) VALUES (?, ?, ?, ?)",
-      [name, email, passwordHash, role],
+      "INSERT INTO users (name, email, password_hash, role, approved_at) VALUES (?, ?, ?, ?, CASE WHEN ? THEN CURRENT_TIMESTAMP ELSE NULL END)",
+      [name, email, passwordHash, role, approved ? 1 : 0],
     );
 
-    sendWelcomeEmail(email, name).catch(() => {});
+    if (approved) {
+      sendWelcomeEmail(email, name).catch(() => {});
+    }
 
     return NextResponse.json(
-      { id: Number(result.lastInsertRowid), name, email, role },
+      { id: Number(result.lastInsertRowid), name, email, role, pendingApproval: !approved },
       { status: 201 },
     );
   } catch (error) {

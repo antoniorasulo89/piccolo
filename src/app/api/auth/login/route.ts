@@ -13,6 +13,7 @@ type LoginUser = {
   role: "admin" | "user";
   onboarded_at: string | null;
   suspended_at: string | null;
+  approved_at: string | null;
   password_hash: string;
 };
 
@@ -26,7 +27,7 @@ export async function POST(request: Request) {
   }
 
   const user = await queryOne<LoginUser>(
-    "SELECT id, name, email, role, onboarded_at, suspended_at, password_hash FROM users WHERE email = ?",
+    "SELECT id, name, email, role, onboarded_at, suspended_at, approved_at, password_hash FROM users WHERE email = ?",
     [email],
   );
 
@@ -36,6 +37,10 @@ export async function POST(request: Request) {
 
   if (user.suspended_at) {
     return jsonError("Account sospeso. Contatta un amministratore.", 403);
+  }
+
+  if (user.role !== "admin" && !user.approved_at) {
+    return jsonError("Account in attesa di approvazione. Un amministratore deve approvarlo prima dell'accesso.", 403);
   }
 
   await setSessionCookie({

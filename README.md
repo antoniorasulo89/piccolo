@@ -26,6 +26,7 @@ Ultima verifica locale: lint, build, audit route, secret scan ed E2E Playwright 
 - Cookie `httpOnly`, `sameSite=lax`, `secure` in produzione.
 - Reset password self-service via email Resend.
 - Reset password assistito da admin con token SHA256 e scadenza.
+- Nuovi account utente in attesa di approvazione admin prima del primo accesso.
 - Profili con bio, avatar, cover image e badge ruolo.
 - Privacy profilo: email visibile/nascosta e profilo discoverable.
 - Preferenze tema: light, dark, system.
@@ -87,7 +88,8 @@ Ultima verifica locale: lint, build, audit route, secret scan ed E2E Playwright 
 ### Admin
 
 - Console admin con sezioni per metriche, utenti, gruppi, contenuti, report e audit log.
-- Gestione utenti: promuovi/retrocedi admin, sospendi/riattiva.
+- Gestione utenti: approva iscritti, promuovi/retrocedi admin, sospendi/riattiva.
+- Eliminazione definitiva account utente da console admin, con protezione su self-delete e ultimo admin.
 - Reset password assistito.
 - Moderazione post/commenti.
 - Moderazione gruppi: lista gruppi, stato privacy, owner, membri, post count, link gestione.

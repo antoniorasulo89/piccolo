@@ -121,7 +121,7 @@ export default async function AdminPage({ searchParams }: AdminPageProps) {
           <Link href="/admin?section=users" className="rounded-lg border border-charcoal/10 bg-surface p-6 transition hover:border-clay/55 hover:-translate-y-0.5">
             <p className="font-mono text-xs font-semibold uppercase tracking-[0.18em] text-charcoal/42">Utenti</p>
             <p className="mt-2 font-mono text-4xl font-semibold text-charcoal">{stats.users}</p>
-            <p className="mt-2 text-sm text-charcoal/50">{stats.admins} admin, {stats.suspended} sospesi</p>
+            <p className="mt-2 text-sm text-charcoal/50">{stats.admins} admin, {stats.pending_users} in attesa, {stats.suspended} sospesi</p>
             <p className="mt-3 inline-flex items-center text-xs font-semibold text-fern-900">Gestisci utenti</p>
           </Link>
           <Link href="/admin?section=groups" className="rounded-lg border border-charcoal/10 bg-surface p-6 transition hover:border-clay/55 hover:-translate-y-0.5">

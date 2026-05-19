@@ -57,6 +57,8 @@ export async function migrate() {
         cover_url TEXT DEFAULT NULL,
         onboarded_at TEXT DEFAULT NULL,
         suspended_at TEXT DEFAULT NULL,
+        approved_at TEXT DEFAULT NULL,
+        approved_by INTEGER DEFAULT NULL,
         privacy_show_email INTEGER NOT NULL DEFAULT 0,
         privacy_discoverable INTEGER NOT NULL DEFAULT 1,
         theme_preference TEXT NOT NULL DEFAULT 'system',
@@ -380,6 +382,8 @@ export async function migrate() {
   const hasCoverUrl = columns.rows.some((column) => column.name === "cover_url");
   const hasOnboardedAt = columns.rows.some((column) => column.name === "onboarded_at");
   const hasSuspendedAt = columns.rows.some((column) => column.name === "suspended_at");
+  const hasApprovedAt = columns.rows.some((column) => column.name === "approved_at");
+  const hasApprovedBy = columns.rows.some((column) => column.name === "approved_by");
   const hasPrivacyShowEmail = columns.rows.some((column) => column.name === "privacy_show_email");
   const hasPrivacyDiscoverable = columns.rows.some((column) => column.name === "privacy_discoverable");
   const hasThemePreference = columns.rows.some((column) => column.name === "theme_preference");
@@ -401,6 +405,15 @@ export async function migrate() {
 
   if (!hasSuspendedAt) {
     await db.execute("ALTER TABLE users ADD COLUMN suspended_at TEXT DEFAULT NULL");
+  }
+
+  if (!hasApprovedAt) {
+    await db.execute("ALTER TABLE users ADD COLUMN approved_at TEXT DEFAULT NULL");
+    await db.execute("UPDATE users SET approved_at = COALESCE(created_at, CURRENT_TIMESTAMP)");
+  }
+
+  if (!hasApprovedBy) {
+    await db.execute("ALTER TABLE users ADD COLUMN approved_by INTEGER DEFAULT NULL");
   }
 
   if (!hasPrivacyShowEmail) {
@@ -572,6 +585,8 @@ export type PublicUser = {
   cover_url: string | null;
   onboarded_at: string | null;
   suspended_at: string | null;
+  approved_at: string | null;
+  approved_by: number | null;
   privacy_show_email: 0 | 1 | boolean;
   privacy_discoverable: 0 | 1 | boolean;
   theme_preference: "light" | "dark" | "system";
