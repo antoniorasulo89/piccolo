@@ -62,6 +62,7 @@ Ultima verifica locale: lint, build, audit route, secret scan ed E2E Playwright 
 - Re-invito possibile dopo rifiuto o revoca.
 - Post di gruppo e post fissati.
 - Espulsione membri con protezioni sui ruoli.
+- Eliminazione definitiva gruppo da parte di owner o admin.
 - Ricerca gruppi per nome/descrizione.
 
 ### Messaggistica

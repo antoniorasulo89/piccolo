@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { LockKey, UsersThree } from "@phosphor-icons/react/dist/ssr";
 import { notFound, redirect } from "next/navigation";
 import { GroupInviteButton } from "@/components/GroupInviteButton";
@@ -50,6 +50,7 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
   const canModerate = isOwner || isCoOwner || isModerator || user.role === "admin";
   const locked = group.privacy === "private" && !group.is_member && user.role !== "admin";
   const canGovern = isOwner || isCoOwner || user.role === "admin";
+  const canDeleteGroup = isOwner || user.role === "admin";
 
   const members = activeTab === "members" || activeTab === "invites"
     ? await getGroupMembers(group.id)
@@ -201,7 +202,13 @@ export default async function GroupPage({ params, searchParams }: GroupPageProps
             <div>
               <h2 className="text-xl font-semibold tracking-tight text-charcoal">Impostazioni</h2>
               <div className="mt-4">
-                <GroupSettings groupId={group.id} initialName={group.name} initialDescription={group.description ?? ""} initialPrivacy={group.privacy} />
+                <GroupSettings
+                  groupId={group.id}
+                  initialName={group.name}
+                  initialDescription={group.description ?? ""}
+                  initialPrivacy={group.privacy}
+                  canDelete={canDeleteGroup}
+                />
               </div>
             </div>
           ) : null}

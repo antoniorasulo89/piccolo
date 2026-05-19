@@ -59,3 +59,33 @@ export async function PATCH(request: Request, context: Context) {
   );
   return NextResponse.json(updated);
 }
+
+export async function DELETE(_request: Request, context: Context) {
+  const user = await getCurrentUser();
+  if (!user) return jsonError("Non autenticato.", 401);
+
+  const { id } = await context.params;
+  const groupId = Number(id);
+  if (!Number.isInteger(groupId)) return jsonError("Gruppo non valido.");
+
+  const group = await queryOne<{ id: number; name: string; owner_id: number }>(
+    "SELECT id, name, owner_id FROM groups WHERE id = ?",
+    [groupId],
+  );
+  if (!group) return jsonError("Gruppo non trovato.", 404);
+
+  const canDelete = group.owner_id === user.id || user.role === "admin";
+  if (!canDelete) return jsonError("Solo owner e admin possono eliminare il gruppo.", 403);
+
+  await recordAuditLog({
+    adminId: user.id,
+    action: "delete_group",
+    targetType: "group",
+    targetId: groupId,
+    note: `${user.role === "admin" && group.owner_id !== user.id ? "admin_override=true " : ""}${group.name}`,
+  });
+
+  await execute("DELETE FROM groups WHERE id = ?", [groupId]);
+
+  return NextResponse.json({ deleted: true });
+}

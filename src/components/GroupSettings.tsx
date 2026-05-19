@@ -9,9 +9,16 @@ type GroupSettingsProps = {
   initialName: string;
   initialDescription: string;
   initialPrivacy: "public" | "private";
+  canDelete: boolean;
 };
 
-export function GroupSettings({ groupId, initialName, initialDescription, initialPrivacy }: GroupSettingsProps) {
+export function GroupSettings({
+  groupId,
+  initialName,
+  initialDescription,
+  initialPrivacy,
+  canDelete,
+}: GroupSettingsProps) {
   const router = useRouter();
   const [pending, startTransition] = useTransition();
   const [privacy, setPrivacy] = useState(initialPrivacy);
@@ -43,6 +50,27 @@ export function GroupSettings({ groupId, initialName, initialDescription, initia
         return;
       }
       showToast("Gruppo aggiornato.");
+      router.refresh();
+    });
+  }
+
+  function deleteGroup() {
+    const confirmed = window.confirm(
+      "Eliminare definitivamente questo gruppo? Verranno rimossi post, membri, richieste e inviti collegati.",
+    );
+    if (!confirmed) return;
+
+    startTransition(async () => {
+      const res = await fetch(`/api/groups/${groupId}`, {
+        method: "DELETE",
+      });
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        showToast(data.error ?? "Impossibile eliminare il gruppo.", "error");
+        return;
+      }
+      showToast("Gruppo eliminato.");
+      router.push("/groups");
       router.refresh();
     });
   }
@@ -102,6 +130,22 @@ export function GroupSettings({ groupId, initialName, initialDescription, initia
       >
         {pending ? "Salvataggio" : "Salva modifiche"}
       </button>
+      {canDelete ? (
+        <div className="mt-4 rounded-lg border border-rose-900/15 bg-rose-100/45 p-4">
+          <p className="text-sm font-semibold text-rose-900">Zona pericolosa</p>
+          <p className="mt-1 text-sm leading-6 text-rose-900/72">
+            L&apos;eliminazione è definitiva e rimuove contenuti, inviti e membri collegati al gruppo.
+          </p>
+          <button
+            type="button"
+            onClick={deleteGroup}
+            disabled={pending}
+            className="mt-3 inline-flex h-10 w-fit items-center gap-2 rounded-lg border border-rose-900/20 px-4 text-sm font-semibold text-rose-900 transition hover:bg-rose-900 hover:text-paper active:translate-y-px disabled:opacity-50"
+          >
+            Elimina gruppo
+          </button>
+        </div>
+      ) : null}
     </form>
   );
 }
