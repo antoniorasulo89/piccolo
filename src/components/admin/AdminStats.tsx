@@ -1,13 +1,14 @@
 import { ShieldCheck } from "@phosphor-icons/react/dist/ssr";
 import { getAdminStats } from "@/lib/admin";
+import { formatAppDateTime } from "@/lib/dates";
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("it-IT", {
+  return formatAppDateTime(value, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  });
 }
 
 export { formatDate };

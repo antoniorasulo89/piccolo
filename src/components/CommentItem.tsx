@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { relativeTimeFromNow } from "@/lib/dates";
 import type { CommentWithAuthor } from "@/lib/queries";
 import { DeleteCommentButton } from "./DeleteCommentButton";
 import { EditCommentButton } from "./EditCommentButton";
@@ -10,20 +11,6 @@ type CommentItemProps = {
   currentUserId: number;
   currentUserRole?: "admin" | "user";
 };
-
-function relativeTime(value: string) {
-  const diff = Date.now() - new Date(value).getTime();
-  const minutes = Math.max(Math.floor(diff / 60000), 0);
-
-  if (minutes < 1) return "ora";
-  if (minutes < 60) return `${minutes} min fa`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h fa`;
-
-  const days = Math.floor(hours / 24);
-  return `${days} g fa`;
-}
 
 export function CommentItem({
   comment,
@@ -48,7 +35,7 @@ export function CommentItem({
                 >
                   {comment.user.name}
                 </Link>
-                <span className="font-mono text-xs text-charcoal/38">{relativeTime(comment.created_at)}</span>
+                <span className="font-mono text-xs text-charcoal/38">{relativeTimeFromNow(comment.created_at)}</span>
               </div>
               <div className="mt-1">
                 <ProfileBadges role={comment.user.role ?? "user"} />

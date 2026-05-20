@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { UserAvatar } from "@/components/UserAvatar";
+import { formatAppDateTime } from "@/lib/dates";
 
 type ChatMessage = {
   id: number;
@@ -23,12 +24,12 @@ type MessageListProps = {
 };
 
 function formatDate(value: string) {
-  return new Intl.DateTimeFormat("it-IT", {
+  return formatAppDateTime(value, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  });
 }
 
 export function MessageList({ initial, conversationId, currentUserId }: MessageListProps) {

@@ -264,6 +264,8 @@ Se `X-Matched-Path` mostra `/_not-found`, l'alias produzione non punta al deploy
 
 SQLite locale / Turso cloud.
 
+I timestamp sono salvati in UTC (`CURRENT_TIMESTAMP` / formato SQLite) e convertiti in interfaccia su `Europe/Rome`. Questa scelta evita ambiguità tra GMT, CET e ora legale italiana.
+
 Elementi principali:
 
 - utenti, profili, preferenze privacy/notifiche

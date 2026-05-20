@@ -6,6 +6,7 @@ import { useState, useTransition } from "react";
 import { NotificationActions } from "@/components/NotificationActions";
 import { ProfileBadges } from "@/components/ProfileBadges";
 import { UserAvatar } from "@/components/UserAvatar";
+import { relativeTimeFromNow } from "@/lib/dates";
 import { showToast } from "./ToastProvider";
 
 type NotificationItem = {
@@ -25,16 +26,6 @@ type NotificationItem = {
     role: "admin" | "user";
   };
 };
-
-function relativeTime(value: string) {
-  const diff = Date.now() - new Date(value).getTime();
-  const minutes = Math.max(Math.floor(diff / 60000), 0);
-  if (minutes < 1) return "ora";
-  if (minutes < 60) return `${minutes} min fa`;
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h fa`;
-  return `${Math.floor(hours / 24)} g fa`;
-}
 
 function notificationCopy(type: string, groupName?: string | null) {
   if (type === "like") return "ha messo like a un tuo post";
@@ -126,7 +117,7 @@ export function NotificationList({ initial }: NotificationListProps) {
                   </div>
                 </div>
                 <p className="font-mono text-xs text-charcoal/42">
-                  {relativeTime(notification.created_at)}
+                  {relativeTimeFromNow(notification.created_at)}
                 </p>
               </Link>
               <div className="flex items-start gap-2 sm:col-span-3 sm:justify-end">

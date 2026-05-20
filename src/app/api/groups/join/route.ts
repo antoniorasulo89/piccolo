@@ -2,6 +2,7 @@ import { createHash } from "node:crypto";
 import { NextResponse } from "next/server";
 import { getCurrentUser } from "@/lib/auth";
 import { isBlockedBy } from "@/lib/blocks";
+import { parseDbTimestamp } from "@/lib/dates";
 import { execute, queryOne } from "@/lib/db";
 import { jsonError } from "@/lib/http";
 
@@ -28,7 +29,8 @@ export async function POST(request: Request) {
   if (invite.max_uses !== null && invite.used_count >= invite.max_uses) {
     return jsonError("Link di invito esaurito.", 400);
   }
-  if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+  const expiresAt = parseDbTimestamp(invite.expires_at);
+  if (expiresAt && expiresAt < new Date()) {
     return jsonError("Link di invito scaduto.", 400);
   }
 

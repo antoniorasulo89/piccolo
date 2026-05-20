@@ -3,6 +3,7 @@
 import { ChatCircleText, UsersThree } from "@phosphor-icons/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
+import { formatAppDateTime } from "@/lib/dates";
 
 type Conversation = {
   id: number;
@@ -19,13 +20,12 @@ type MessagesClientProps = {
 };
 
 function formatDate(value: string | null) {
-  if (!value) return "nessun messaggio";
-  return new Intl.DateTimeFormat("it-IT", {
+  return formatAppDateTime(value, {
     day: "2-digit",
     month: "short",
     hour: "2-digit",
     minute: "2-digit",
-  }).format(new Date(value));
+  }, "nessun messaggio");
 }
 
 export function MessagesClient({ initial }: MessagesClientProps) {

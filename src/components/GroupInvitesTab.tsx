@@ -2,6 +2,7 @@
 
 import { LinkSimple, Trash } from "@phosphor-icons/react";
 import { useState } from "react";
+import { formatAppDateTime } from "@/lib/dates";
 import { showToast } from "./ToastProvider";
 
 type InviteItem = {
@@ -30,8 +31,13 @@ function statusLabel(s: string) {
 
 function formatDate(value: string | null) {
   if (!value) return "—";
-  const date = new Date(value);
-  return date.toLocaleDateString("it-IT", { day: "numeric", month: "short", year: "numeric", hour: "2-digit", minute: "2-digit" });
+  return formatAppDateTime(value, {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+  });
 }
 
 export function GroupInvitesTab({ groupId }: { groupId: number }) {

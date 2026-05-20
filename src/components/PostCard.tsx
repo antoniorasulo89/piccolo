@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ChatCircleText } from "@phosphor-icons/react/dist/ssr";
+import { relativeTimeFromNow } from "@/lib/dates";
 import type { PostWithAuthor } from "@/lib/db";
 import { BookmarkButton } from "./BookmarkButton";
 import { DeletePostButton } from "./DeletePostButton";
@@ -14,20 +15,6 @@ type PostCardProps = {
   currentUserId: number;
   staggerIndex?: number;
 };
-
-function relativeTime(value: string) {
-  const diff = Date.now() - new Date(value).getTime();
-  const minutes = Math.max(Math.floor(diff / 60000), 0);
-
-  if (minutes < 1) return "ora";
-  if (minutes < 60) return `${minutes} min fa`;
-
-  const hours = Math.floor(minutes / 60);
-  if (hours < 24) return `${hours} h fa`;
-
-  const days = Math.floor(hours / 24);
-  return `${days} g fa`;
-}
 
 export function PostCard({ post, currentUserId, staggerIndex = 0 }: PostCardProps) {
   return (
@@ -55,7 +42,7 @@ export function PostCard({ post, currentUserId, staggerIndex = 0 }: PostCardProp
               >
                 {post.user.name}
               </Link>
-              <p className="font-mono text-xs text-charcoal/45">{relativeTime(post.created_at)}</p>
+              <p className="font-mono text-xs text-charcoal/45">{relativeTimeFromNow(post.created_at)}</p>
               {"group_name" in post && post.group_name ? (
                 <Link
                   href={`/groups/${post.group_slug}`}
